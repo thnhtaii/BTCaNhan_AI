@@ -216,7 +216,7 @@ html_content = """<!DOCTYPE html><html class="light" lang="en" style="width: 100
             </div>
         </section>
         
-        <section class="bg-surface-container-high border border-outline-variant rounded-xl flex flex-col shadow-sm h-[250px]">
+        <section class="bg-surface-container-high border border-outline-variant rounded-xl flex flex-col shadow-sm h-[300px]">
             <div class="flex items-center justify-between px-3 py-1.5 bg-surface-container-highest border-b border-outline-variant rounded-t-xl">
                 <div class="flex items-center gap-2">
                     <span class="material-symbols-outlined text-primary text-[15px]">terminal</span>
