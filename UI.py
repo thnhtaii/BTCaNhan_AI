@@ -81,13 +81,13 @@ html_content = """<!DOCTYPE html><html class="light" lang="en" style="width: 100
                     "mono": ["JetBrains Mono"]
             },
             "fontSize": {
-                    "headline-md": ["18px", {"lineHeight": "26px", "fontWeight": "600"}],
-                    "label-sm": ["11px", {"lineHeight": "14px", "fontWeight": "600"}],
-                    "headline-lg": ["24px", {"lineHeight": "30px", "fontWeight": "700"}],
-                    "body-lg": ["15px", {"lineHeight": "21px", "fontWeight": "400"}],
-                    "body-md": ["13px", {"lineHeight": "18px", "fontWeight": "400"}],
-                    "label-md": ["13px", {"lineHeight": "16px", "fontWeight": "600"}],
-                    "headline-sm": ["16px", {"lineHeight": "22px", "fontWeight": "600"}]
+                    "headline-md": ["16px", {"lineHeight": "22px", "fontWeight": "600"}],
+                    "label-sm": ["10px", {"lineHeight": "13px", "fontWeight": "600"}],
+                    "headline-lg": ["21px", {"lineHeight": "26px", "letterSpacing": "-0.01em", "fontWeight": "700"}],
+                    "body-lg": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                    "body-md": ["12px", {"lineHeight": "17px", "fontWeight": "400"}],
+                    "label-md": ["12px", {"lineHeight": "15px", "fontWeight": "600"}],
+                    "headline-sm": ["15px", {"lineHeight": "21px", "fontWeight": "600"}]
             }
           },
         },
@@ -95,8 +95,8 @@ html_content = """<!DOCTYPE html><html class="light" lang="en" style="width: 100
     </script>
 <style>
         body { font-family: 'Inter', sans-serif; background-color: #f5f6f8; margin: 0; }
-        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 20; }
-        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 18; }
+        .custom-scrollbar::-webkit-scrollbar { width: 5px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(0, 74, 198, 0.15); border-radius: 10px; }
         .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(0, 74, 198, 0.3); }
@@ -107,122 +107,123 @@ html_content = """<!DOCTYPE html><html class="light" lang="en" style="width: 100
         .cell-wrapper input { width: 100%; }
         .spinner-btns {
             position: absolute; right: 5px; top: 50%; transform: translateY(-50%);
-            display: flex; flex-direction: column; gap: 2px; opacity: 0;
+            display: flex; flex-direction: column; gap: 1px; opacity: 0;
             transition: opacity 0.2s ease; pointer-events: none;
         }
         .cell-wrapper:hover .spinner-btns { opacity: 1; pointer-events: auto; }
         .spinner-btns button {
-            width: 20px; height: 16px; display: flex; align-items: center; justify-content: center;
+            width: 18px; height: 14px; display: flex; align-items: center; justify-content: center;
             background: rgba(255, 255, 255, 0.95); border: 1px solid #c3c6d7; border-radius: 4px;
-            cursor: pointer; color: #434655; font-size: 9px; line-height: 1; padding: 0; transition: background 0.15s;
+            cursor: pointer; color: #434655; font-size: 8px; line-height: 1; padding: 0; transition: background 0.15s;
         }
         .spinner-btns button:hover { background: #d3daef; }
     </style>
 </head>
 <body class="bg-background text-on-surface text-sm flex flex-col h-screen w-screen overflow-hidden">
 
-<header class="flex justify-between items-center px-6 min-h-[60px] w-full bg-surface-container-lowest border-b border-outline-variant shrink-0 z-50">
+<header class="flex justify-between items-center px-6 min-h-[50px] h-12 w-full bg-surface-container-lowest border-b border-outline-variant shrink-0 z-50">
     <div class="flex items-center gap-3">
-        <span class="font-headline-sm text-[18px] font-bold text-on-surface">8-Puzzle Solver Simulator</span>
+        <span class="font-headline-sm text-[17px] font-bold text-on-surface">8-Puzzle Solver Simulator</span>
     </div>
     <nav class="hidden md:flex items-center gap-4">
-        <button class="flex items-center gap-1 text-primary font-bold border-b-2 border-primary pb-0.5 font-label-md text-[14px]">
+        <button class="flex items-center gap-1 text-primary font-bold border-b-2 border-primary pb-0.5 font-label-md text-[13px]">
             <span>BFS (Uninformed)</span>
         </button>
     </nav>
 </header>
 
-<main class="flex-1 w-full p-6 overflow-y-auto custom-scrollbar">
-<div class="grid grid-cols-1 lg:grid-cols-12 gap-6 w-full max-w-[2000px] mx-auto">
-    <div class="lg:col-span-7 flex flex-col gap-6">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <section class="bg-surface-container-lowest border border-outline-variant rounded-xl p-5 shadow-sm">
-                <div class="flex items-center justify-between mb-4 border-b border-outline-variant pb-2">
+<main class="flex-1 w-full p-4 overflow-hidden flex items-center justify-center">
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-4 w-full max-w-[1180px] mx-auto items-start">
+    
+    <div class="lg:col-span-7 flex flex-col gap-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <section class="bg-surface-container-lowest border border-outline-variant rounded-xl p-4 shadow-sm">
+                <div class="flex items-center justify-between mb-2.5 border-b border-outline-variant pb-2">
                     <h3 class="font-headline-sm text-headline-sm text-on-surface">1. Initial State</h3>
-                    <span class="material-symbols-outlined text-outline text-[18px]">tune</span>
+                    <span class="material-symbols-outlined text-outline text-[16px]">tune</span>
                 </div>
-                <div class="grid grid-cols-3 gap-3 mb-4" id="initial-grid"></div>
-                <div class="flex gap-3">
-                    <button id="btn-random" class="flex-1 py-2 bg-[#e1e8fd] text-primary border border-primary/20 rounded-lg font-semibold text-label-md hover:bg-[#d3daef] transition-colors">Random</button>
-                    <button id="btn-reset" class="flex-1 py-2 bg-[#e1e8fd] text-primary border border-primary/20 rounded-lg font-semibold text-label-md hover:bg-[#d3daef] transition-colors">Reset</button>
-                    <button id="btn-load" class="flex-1 py-2 bg-[#e1e8fd] text-primary border border-primary/20 rounded-lg font-semibold text-label-md hover:bg-[#d3daef] transition-colors">Load Example</button>
+                <div class="grid grid-cols-3 gap-2 mb-3.5" id="initial-grid"></div>
+                <div class="flex gap-2">
+                    <button id="btn-random" class="flex-1 py-1.5 bg-[#e1e8fd] text-primary border border-primary/20 rounded-lg font-semibold text-label-md hover:bg-[#d3daef] transition-colors">Random</button>
+                    <button id="btn-reset" class="flex-1 py-1.5 bg-[#e1e8fd] text-primary border border-primary/20 rounded-lg font-semibold text-label-md hover:bg-[#d3daef] transition-colors">Reset</button>
+                    <button id="btn-load" class="flex-1 py-1.5 bg-[#e1e8fd] text-primary border border-primary/20 rounded-lg font-semibold text-label-md hover:bg-[#d3daef] transition-colors">Load Example</button>
                 </div>
             </section>
             
-            <section class="bg-surface-container-lowest border border-outline-variant rounded-xl p-5 shadow-sm">
-                <div class="flex items-center justify-between mb-4 border-b border-outline-variant pb-2">
+            <section class="bg-surface-container-lowest border border-outline-variant rounded-xl p-4 shadow-sm">
+                <div class="flex items-center justify-between mb-2.5 border-b border-outline-variant pb-2">
                     <h3 class="font-headline-sm text-headline-sm text-on-surface">Goal State</h3>
-                    <span class="material-symbols-outlined text-primary text-[18px]">check_circle</span>
+                    <span class="material-symbols-outlined text-primary text-[16px]">check_circle</span>
                 </div>
-                <div class="grid grid-cols-3 gap-3">
-                    <div class="h-12 flex items-center justify-center bg-surface-container-low rounded-lg font-headline-sm text-headline-sm text-on-surface border border-outline-variant/20">1</div>
-                    <div class="h-12 flex items-center justify-center bg-surface-container-low rounded-lg font-headline-sm text-headline-sm text-on-surface border border-outline-variant/20">2</div>
-                    <div class="h-12 flex items-center justify-center bg-surface-container-low rounded-lg font-headline-sm text-headline-sm text-on-surface border border-outline-variant/20">3</div>
-                    <div class="h-12 flex items-center justify-center bg-surface-container-low rounded-lg font-headline-sm text-headline-sm text-on-surface border border-outline-variant/20">4</div>
-                    <div class="h-12 flex items-center justify-center bg-surface-container-low rounded-lg font-headline-sm text-headline-sm text-on-surface border border-outline-variant/20">5</div>
-                    <div class="h-12 flex items-center justify-center bg-surface-container-low rounded-lg font-headline-sm text-headline-sm text-on-surface border border-outline-variant/20">6</div>
-                    <div class="h-12 flex items-center justify-center bg-surface-container-low rounded-lg font-headline-sm text-headline-sm text-on-surface border border-outline-variant/20">7</div>
-                    <div class="h-12 flex items-center justify-center bg-surface-container-low rounded-lg font-headline-sm text-headline-sm text-on-surface border border-outline-variant/20">8</div>
+                <div class="grid grid-cols-3 gap-2 mb-3.5">
+                    <div class="h-12 flex items-center justify-center bg-surface-container-low rounded-lg font-headline-sm text-[17px] font-bold text-on-surface border border-outline-variant/20">1</div>
+                    <div class="h-12 flex items-center justify-center bg-surface-container-low rounded-lg font-headline-sm text-[17px] font-bold text-on-surface border border-outline-variant/20">2</div>
+                    <div class="h-12 flex items-center justify-center bg-surface-container-low rounded-lg font-headline-sm text-[17px] font-bold text-on-surface border border-outline-variant/20">3</div>
+                    <div class="h-12 flex items-center justify-center bg-surface-container-low rounded-lg font-headline-sm text-[17px] font-bold text-on-surface border border-outline-variant/20">4</div>
+                    <div class="h-12 flex items-center justify-center bg-surface-container-low rounded-lg font-headline-sm text-[17px] font-bold text-on-surface border border-outline-variant/20">5</div>
+                    <div class="h-12 flex items-center justify-center bg-surface-container-low rounded-lg font-headline-sm text-[17px] font-bold text-on-surface border border-outline-variant/20">6</div>
+                    <div class="h-12 flex items-center justify-center bg-surface-container-low rounded-lg font-headline-sm text-[17px] font-bold text-on-surface border border-outline-variant/20">7</div>
+                    <div class="h-12 flex items-center justify-center bg-surface-container-low rounded-lg font-headline-sm text-[17px] font-bold text-on-surface border border-outline-variant/20">8</div>
                     <div class="h-12 flex items-center justify-center bg-surface-container-lowest rounded-lg text-outline-variant border border-dashed border-outline-variant"></div>
                 </div>
             </section>
         </div>
         
-        <section class="bg-surface-container-lowest border border-outline-variant rounded-xl p-5 shadow-sm flex flex-col items-center">
-            <div class="flex items-center justify-between border-b border-outline-variant pb-3 mb-3 w-full">
+        <section class="bg-surface-container-lowest border border-outline-variant rounded-xl p-4 shadow-sm flex flex-col items-center">
+            <div class="flex items-center justify-between border-b border-outline-variant pb-2 mb-2 w-full">
                 <h3 class="font-headline-sm text-headline-sm text-on-surface">3. Visual Simulation</h3>
                 <div id="step-wrapper">
-                    <span id="step-label" class="px-3 py-1 bg-surface-container-high text-on-surface-variant rounded font-semibold text-label-md">Ready</span>
+                    <span id="step-label" class="px-2.5 py-0.5 bg-surface-container-high text-on-surface-variant rounded font-semibold text-label-md">Ready</span>
                 </div>
             </div>
-            <div class="w-full flex items-center justify-center py-2">
-                <div id="anim-board" class="w-full max-w-[260px] aspect-square bg-surface-container-low rounded-xl p-2.5 grid grid-cols-3 gap-2.5 relative overflow-hidden"></div>
+            <div class="w-full flex items-center justify-center py-1">
+                <div id="anim-board" class="w-full max-w-[210px] aspect-square bg-surface-container-low rounded-xl p-2 grid grid-cols-3 gap-2 relative overflow-hidden"></div>
             </div>
         </section>
     </div>
     
-    <div class="lg:col-span-5 flex flex-col gap-6">
-        <div class="grid grid-cols-2 gap-3">
-            <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-4 shadow-sm">
-                <span class="font-label-sm text-label-sm text-outline uppercase block mb-1">Steps</span>
+    <div class="lg:col-span-5 flex flex-col gap-4">
+        <div class="grid grid-cols-2 gap-2">
+            <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-3 shadow-sm">
+                <span class="font-label-sm text-label-sm text-outline uppercase block mb-0.5">Steps</span>
                 <div id="stat-steps" class="font-headline-md text-headline-md text-on-surface">-</div>
             </div>
-            <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-4 shadow-sm">
-                <span class="font-label-sm text-label-sm text-outline uppercase block mb-1">Nodes</span>
+            <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-3 shadow-sm">
+                <span class="font-label-sm text-label-sm text-outline uppercase block mb-0.5">Nodes</span>
                 <div id="stat-nodes" class="font-headline-md text-headline-md text-on-surface">-</div>
             </div>
-            <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-4 shadow-sm">
-                <span class="font-label-sm text-label-sm text-outline uppercase block mb-1">Time</span>
+            <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-3 shadow-sm">
+                <span class="font-label-sm text-label-sm text-outline uppercase block mb-0.5">Time</span>
                 <div id="stat-time" class="font-headline-md text-headline-md text-on-surface">-</div>
             </div>
-            <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-4 shadow-sm">
-                <span class="font-label-sm text-label-sm text-outline uppercase block mb-1">Max Depth</span>
+            <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-3 shadow-sm">
+                <span class="font-label-sm text-label-sm text-outline uppercase block mb-0.5">Max Depth</span>
                 <div id="stat-depth" class="font-headline-md text-headline-md text-on-surface">-</div>
             </div>
         </div>
         
-        <section class="bg-surface-container-lowest border border-outline-variant rounded-xl p-5 shadow-sm">
-            <div class="flex items-center justify-between mb-3 border-b border-outline-variant pb-2">
+        <section class="bg-surface-container-lowest border border-outline-variant rounded-xl p-4 shadow-sm">
+            <div class="flex items-center justify-between mb-2 border-b border-outline-variant pb-1.5">
                 <h3 class="font-headline-sm text-headline-sm text-on-surface">2. BFS Configuration</h3>
             </div>
-            <div class="flex gap-4 justify-center">
-                <button id="btn-early" class="flex-1 h-10 px-4 bg-white shadow-sm border border-outline-variant rounded-full flex items-center justify-center transition-all hover:bg-surface-container-low cursor-pointer">
-                    <span class="font-bold text-primary text-[14px]">Early Goal Test</span>
+            <div class="flex gap-3 justify-center">
+                <button id="btn-early" class="flex-1 h-9 px-4 bg-white shadow-sm border border-outline-variant rounded-full flex items-center justify-center transition-all hover:bg-surface-container-low cursor-pointer">
+                    <span class="font-bold text-primary text-[13px]">Early Goal Test</span>
                 </button>
-                <button id="btn-late" class="flex-1 h-10 px-4 bg-surface-container-low border border-outline-variant/30 rounded-full flex items-center justify-center transition-all hover:bg-surface-container-highest/50 cursor-pointer">
-                    <span class="font-bold text-on-surface-variant text-[14px]">Late Goal Test</span>
+                <button id="btn-late" class="flex-1 h-9 px-4 bg-surface-container-low border border-outline-variant/30 rounded-full flex items-center justify-center transition-all hover:bg-surface-container-highest/50 cursor-pointer">
+                    <span class="font-bold text-on-surface-variant text-[13px]">Late Goal Test</span>
                 </button>
             </div>
         </section>
         
-        <section class="bg-surface-container-high border border-outline-variant rounded-xl flex flex-col shadow-sm h-[340px]">
-            <div class="flex items-center justify-between px-4 py-2 bg-surface-container-highest border-b border-outline-variant rounded-t-xl">
+        <section class="bg-surface-container-high border border-outline-variant rounded-xl flex flex-col shadow-sm h-[250px]">
+            <div class="flex items-center justify-between px-3 py-1.5 bg-surface-container-highest border-b border-outline-variant rounded-t-xl">
                 <div class="flex items-center gap-2">
-                    <span class="material-symbols-outlined text-primary text-[16px]">terminal</span>
-                    <span class="font-label-md text-[13px] font-bold text-on-surface uppercase tracking-wider">Execution Log</span>
+                    <span class="material-symbols-outlined text-primary text-[15px]">terminal</span>
+                    <span class="font-label-md text-[12px] font-bold text-on-surface uppercase tracking-wider">Execution Log</span>
                 </div>
             </div>
-            <div id="execution-log" class="flex-1 p-4 font-mono text-[12px] leading-relaxed overflow-y-auto custom-scrollbar text-[#0f172a]">
+            <div id="execution-log" class="flex-1 p-3 font-mono text-[11px] leading-relaxed overflow-y-auto custom-scrollbar text-[#0f172a]">
                 <span class="text-outline">Waiting for execution...</span>
             </div>
         </section>
@@ -244,7 +245,6 @@ function buildInitialGrid(values) {
         const input = document.createElement('input');
         input.type = 'number';
         input.id = `cell-${i}`;
-        // Ô số to hơn (h-12)
         input.className = 'h-12 w-full text-center bg-surface-container-high rounded-lg font-headline-sm text-[18px] font-bold text-primary border border-primary/20 focus:outline-none focus:ring-2 focus:ring-primary';
         input.value = values[i];
         input.min = 0;
@@ -350,17 +350,17 @@ function formatLogState(title, state, action=null) {
         let row = state.slice(i, i+3).map(x => (x===0 || x==='0') ? "[ ]" : ("  "+x+"  ")).join("");
         stateStr += " " + row + "\\n";
     }
-    let titleHtml = action ? `<p class="mb-1.5 font-semibold" style="font-size:13px;">Bước ${title}: Di chuyển ô trống sang <span class="text-primary">${action}</span></p>` 
-                           : `<p class="mb-1.5 font-semibold" style="font-size:13px;">${title}</p>`;
+    let titleHtml = action ? `<p class="mb-1 font-semibold" style="font-size:12px;">Bước ${title}: Di chuyển ô trống sang <span class="text-primary">${action}</span></p>` 
+                           : `<p class="mb-1 font-semibold" style="font-size:12px;">${title}</p>`;
                            
     return `
     <div class="mb-2">
         ${titleHtml}
-        <div class="bg-surface-container-low p-2 rounded border border-outline-variant/30 inline-block">
-            <pre class="leading-tight text-[12px] font-bold text-on-surface">${stateStr}</pre>
+        <div class="bg-surface-container-low p-1.5 rounded border border-outline-variant/30 inline-block">
+            <pre class="leading-tight text-[11px] font-bold text-on-surface">${stateStr}</pre>
         </div>
     </div>
-    <div class="border-t border-outline-variant/20 pt-1 opacity-50 mt-2 mb-2"></div>
+    <div class="border-t border-outline-variant/20 pt-1 opacity-50 mt-1 mb-1"></div>
     `;
 }
 
@@ -368,7 +368,7 @@ async function animatePath(start_state, path) {
     clearTimeout(animationTimeout);
     renderBoard(start_state);
     
-    document.getElementById('step-wrapper').innerHTML = `<span id="step-label" class="px-3 py-1 bg-surface-container-high text-on-surface-variant rounded font-semibold text-label-md">Step 0/${path.length}</span>`;
+    document.getElementById('step-wrapper').innerHTML = `<span id="step-label" class="px-2.5 py-0.5 bg-surface-container-high text-on-surface-variant rounded font-semibold text-label-md">Step 0/${path.length}</span>`;
     
     await new Promise(r => { animationTimeout = setTimeout(r, 800); });
     for(let i=0; i<path.length; i++) {
@@ -376,8 +376,7 @@ async function animatePath(start_state, path) {
         document.getElementById('step-label').textContent = `Step ${i+1}/${path.length}`;
         await new Promise(r => { animationTimeout = setTimeout(r, 500); });
     }
-    // Chữ Finished bo nền xanh ngọc đậm đẹp mắt
-    document.getElementById('step-wrapper').innerHTML = `<span style="background:#0d9488; color:white; padding:4px 12px; border-radius:6px; font-size:12px; font-weight:600; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">Finished</span>`;
+    document.getElementById('step-wrapper').innerHTML = `<span style="background:#0d9488; color:white; padding:3px 10px; border-radius:6px; font-size:11px; font-weight:600; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">Finished</span>`;
 }
 
 async function callBfs(mode) {
@@ -395,19 +394,19 @@ async function callBfs(mode) {
         document.getElementById('stat-time').innerText = result.time + "ms";
         document.getElementById('stat-depth').innerText = result.depth;
         
-        let logHtml = `<div class="text-primary font-bold mb-3" style="font-size:13px;">ĐANG GIẢI BẰNG: ${mode.toUpperCase()} GOAL TEST</div>`;
+        let logHtml = `<div class="text-primary font-bold mb-2" style="font-size:12px;">ĐANG GIẢI BẰNG: ${mode.toUpperCase()} GOAL TEST</div>`;
         logHtml += formatLogState("Trạng thái bắt đầu:", start_state);
         result.path.forEach((step, idx) => { logHtml += formatLogState(idx+1, step[1], step[0]); });
         document.getElementById('execution-log').innerHTML = logHtml;
         animatePath(start_state, result.path);
     } else {
-        document.getElementById('execution-log').innerHTML = '<div class="text-red-600 font-bold" style="font-size:13px;">Không tìm thấy giải pháp!</div>';
+        document.getElementById('execution-log').innerHTML = '<div class="text-red-600 font-bold" style="font-size:12px;">Không tìm thấy giải pháp!</div>';
         document.getElementById('stat-steps').innerText = "-";
         document.getElementById('stat-nodes').innerText = result.nodes.toLocaleString();
         document.getElementById('stat-time').innerText = result.time + "ms";
         document.getElementById('stat-depth').innerText = "-";
         renderBoard(start_state);
-        document.getElementById('step-wrapper').innerHTML = `<span style="background:#dc2626; color:white; padding:4px 12px; border-radius:6px; font-size:12px; font-weight:600; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">No Solution</span>`;
+        document.getElementById('step-wrapper').innerHTML = `<span style="background:#dc2626; color:white; padding:3px 10px; border-radius:6px; font-size:11px; font-weight:600; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">No Solution</span>`;
     }
 }
 
@@ -441,8 +440,8 @@ if __name__ == '__main__':
         '8-Puzzle Solver Simulator', 
         html=html_content, 
         js_api=api,
-        width=1200, 
-        height=800, 
+        width=1180,  
+        height=700,  
         resizable=True
     )
     webview.start()
