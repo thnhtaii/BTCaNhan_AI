@@ -133,8 +133,7 @@ html_content = """<!DOCTYPE html><html class="light" lang="en" style="width: 100
 </header>
 
 <main class="flex-1 w-full p-6 overflow-y-auto custom-scrollbar">
-<div class="grid grid-cols-1 lg:grid-cols-12 gap-6 w-full max-w-[1250px] mx-auto">
-    
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-6 w-full max-w-[2000px] mx-auto">
     <div class="lg:col-span-7 flex flex-col gap-6">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <section class="bg-surface-container-lowest border border-outline-variant rounded-xl p-5 shadow-sm">
@@ -442,8 +441,8 @@ if __name__ == '__main__':
         '8-Puzzle Solver Simulator', 
         html=html_content, 
         js_api=api,
-        width=1250, # Kích thước lớn hơn chút xíu
-        height=820, # Chiều cao mở rộng lấp gọn nội dung tránh thanh cuộn
+        width=1200, 
+        height=800, 
         resizable=True
     )
     webview.start()
