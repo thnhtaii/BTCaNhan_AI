@@ -340,7 +340,7 @@ function resetBoard() {
 }
 
 function loadExample() {
-    const nums = [1,8,3,2,6,4,7,0,5];
+    const nums = [1, 8, 3, 2, 6, 4, 7, 0, 5];
     buildInitialGrid(nums); renderBoard(nums);
 }
 
