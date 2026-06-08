@@ -277,16 +277,9 @@ html_content = """<!DOCTYPE html><html class="light" lang="en" style="width: 100
         
         <section class="bg-surface-container-lowest border border-outline-variant rounded-xl p-4 shadow-sm">
             <div class="flex items-center justify-between mb-2 border-b border-outline-variant pb-1.5">
-                <h3 class="font-headline-sm text-headline-sm text-on-surface">2. BFS Configuration</h3>
+                <h3 id="config-title" class="font-headline-sm text-headline-sm text-on-surface">2. BFS Configuration</h3>
             </div>
-            <div class="flex gap-3 justify-center">
-                <button id="btn-early" class="flex-1 h-9 px-4 bg-white shadow-sm border border-outline-variant rounded-full flex items-center justify-center transition-all hover:bg-surface-container-low cursor-pointer">
-                    <span class="font-bold text-primary text-[13px]">Early Goal Test</span>
-                </button>
-                <button id="btn-late" class="flex-1 h-9 px-4 bg-surface-container-low border border-outline-variant/30 rounded-full flex items-center justify-center transition-all hover:bg-surface-container-highest/50 cursor-pointer">
-                    <span class="font-bold text-on-surface-variant text-[13px]">Late Goal Test</span>
-                </button>
-            </div>
+            <div id="config-body"></div>
         </section>
         
         <section class="bg-surface-container-high border border-outline-variant rounded-xl flex flex-col shadow-sm h-[300px]">
@@ -460,11 +453,69 @@ const algoNames = {
     astar: 'A*', greedy: 'Greedy Best-First', ida_star: 'IDA*'
 };
 
+// Which algorithms support early/late goal test
+const hasEarlyLate = ['bfs', 'dfs', 'ucs', 'astar'];
+// Which algorithms need a depth limit input
+const hasDepthLimit = ['ids'];
+// Which algorithms just have a Run button
+const runOnly = ['greedy', 'ida_star'];
+
 function toggleDropdown() {
     const menu = document.getElementById('algo-menu');
     const btn = document.getElementById('algo-toggle');
     menu.classList.toggle('show');
     btn.classList.toggle('open');
+}
+
+function renderConfigUI() {
+    const body = document.getElementById('config-body');
+    const title = document.getElementById('config-title');
+    title.textContent = '2. ' + algoNames[currentAlgo] + ' Configuration';
+    
+    if (hasEarlyLate.includes(currentAlgo)) {
+        body.innerHTML = `
+            <div class="flex gap-3 justify-center">
+                <button id="btn-early" onclick="callSolve('early')" class="flex-1 h-9 px-4 bg-white shadow-sm border border-outline-variant rounded-full flex items-center justify-center transition-all hover:bg-surface-container-low cursor-pointer">
+                    <span class="font-bold text-primary text-[13px]">Early Goal Test</span>
+                </button>
+                <button id="btn-late" onclick="callSolve('late')" class="flex-1 h-9 px-4 bg-surface-container-low border border-outline-variant/30 rounded-full flex items-center justify-center transition-all hover:bg-surface-container-highest/50 cursor-pointer">
+                    <span class="font-bold text-on-surface-variant text-[13px]">Late Goal Test</span>
+                </button>
+            </div>`;
+    } else if (hasDepthLimit.includes(currentAlgo)) {
+        body.innerHTML = `
+            <div class="flex flex-col gap-3 items-center">
+                <div class="flex items-center gap-3">
+                    <span class="font-label-md text-[12px] text-on-surface-variant font-semibold">Depth Limit:</span>
+                    <div class="flex items-center border border-outline-variant rounded-lg overflow-hidden">
+                        <button onclick="adjustDepth(-1)" class="w-8 h-9 flex items-center justify-center bg-surface-container-low hover:bg-surface-container-highest transition-colors cursor-pointer border-r border-outline-variant">
+                            <span class="text-primary font-bold text-[16px]">−</span>
+                        </button>
+                        <input type="number" id="depth-limit" value="50" min="1" max="200" class="w-14 h-9 text-center font-headline-sm text-[16px] font-bold text-primary bg-white border-none focus:outline-none focus:ring-0">
+                        <button onclick="adjustDepth(1)" class="w-8 h-9 flex items-center justify-center bg-surface-container-low hover:bg-surface-container-highest transition-colors cursor-pointer border-l border-outline-variant">
+                            <span class="text-primary font-bold text-[16px]">+</span>
+                        </button>
+                    </div>
+                </div>
+                <button onclick="callSolve('none')" class="w-full h-9 px-4 bg-primary text-white rounded-full flex items-center justify-center transition-all hover:bg-primary/90 cursor-pointer shadow-sm">
+                    <span class="font-bold text-[13px]">Run IDS</span>
+                </button>
+            </div>`;
+    } else {
+        body.innerHTML = `
+            <div class="flex justify-center">
+                <button onclick="callSolve('none')" class="w-full h-9 px-4 bg-primary text-white rounded-full flex items-center justify-center transition-all hover:bg-primary/90 cursor-pointer shadow-sm">
+                    <span class="font-bold text-[13px]">Run ${algoNames[currentAlgo]}</span>
+                </button>
+            </div>`;
+    }
+}
+
+function adjustDepth(delta) {
+    const input = document.getElementById('depth-limit');
+    let val = parseInt(input.value) || 50;
+    val = Math.max(1, Math.min(200, val + delta));
+    input.value = val;
 }
 
 function selectAlgo(el) {
@@ -475,9 +526,7 @@ function selectAlgo(el) {
     document.getElementById('algo-label').textContent = algoNames[currentAlgo] + ' (' + currentCategory + ')';
     document.getElementById('algo-menu').classList.remove('show');
     document.getElementById('algo-toggle').classList.remove('open');
-    // Update config section title
-    const configTitle = document.querySelector('#config-title');
-    if(configTitle) configTitle.textContent = '2. ' + algoNames[currentAlgo] + ' Configuration';
+    renderConfigUI();
 }
 
 // Close dropdown when clicking outside
@@ -496,14 +545,22 @@ async function callSolve(mode) {
         if(isNaN(val)) val = 0;
         start_state.push(val);
     }
-    const result = await pywebview.api.solve(start_state, mode, currentAlgo);
+    
+    // Get extra params based on algorithm
+    let depthLimit = 50;
+    const depthInput = document.getElementById('depth-limit');
+    if(depthInput) depthLimit = parseInt(depthInput.value) || 50;
+    
+    const result = await pywebview.api.solve(start_state, mode, currentAlgo, depthLimit);
+    const modeLabel = mode === 'none' ? '' : ' — ' + mode.toUpperCase() + ' GOAL TEST';
+    
     if (result.success) {
         document.getElementById('stat-steps').innerText = result.depth;
         document.getElementById('stat-nodes').innerText = result.nodes.toLocaleString();
         document.getElementById('stat-time').innerText = result.time + "ms";
         document.getElementById('stat-depth').innerText = result.depth;
         
-        let logHtml = `<div class="text-primary font-bold mb-2" style="font-size:12px;">ĐANG GIẢI BẰNG: ${algoNames[currentAlgo].toUpperCase()} — ${mode.toUpperCase()} GOAL TEST</div>`;
+        let logHtml = `<div class="text-primary font-bold mb-2" style="font-size:12px;">ĐANG GIẢI BẰNG: ${algoNames[currentAlgo].toUpperCase()}${modeLabel}</div>`;
         logHtml += formatLogState("Trạng thái bắt đầu:", start_state);
         result.path.forEach((step, idx) => { logHtml += formatLogState(idx+1, step[1], step[0]); });
         document.getElementById('execution-log').innerHTML = logHtml;
@@ -520,18 +577,17 @@ async function callSolve(mode) {
 }
 
 window.addEventListener('pywebviewready', function() {
-    document.getElementById('btn-early').onclick = () => callSolve('early');
-    document.getElementById('btn-late').onclick = () => callSolve('late');
     document.getElementById('btn-random').onclick = randomBoard;
     document.getElementById('btn-reset').onclick = resetBoard;
     document.getElementById('btn-load').onclick = loadExample;
     loadExample();
+    renderConfigUI();
 });
 </script>
 </body></html>"""
 
 class Api:
-    def solve(self, start_state, mode, algorithm='bfs'):
+    def solve(self, start_state, mode, algorithm='bfs', depth_limit=50):
         start_time = time.time()
         goal_state = [1, 2, 3, 4, 5, 6, 7, 8, 0]
         
@@ -541,11 +597,11 @@ class Api:
         elif algorithm == 'dfs':
             path, nodes_generated = dfs(start_state, goal_state, mode)
         elif algorithm == 'ids':
-            path, nodes_generated = ids(start_state, goal_state, mode)
+            path, nodes_generated = ids(start_state, goal_state, max_depth=depth_limit)
         elif algorithm == 'ucs':
-            path, nodes_generated = ucs(start_state, goal_state)
+            path, nodes_generated = ucs(start_state, goal_state, mode)
         elif algorithm == 'astar':
-            path, nodes_generated = astar(start_state, goal_state)
+            path, nodes_generated = astar(start_state, goal_state, mode)
         elif algorithm == 'greedy':
             path, nodes_generated = greedy(start_state, goal_state)
         elif algorithm == 'ida_star':
