@@ -1,7 +1,13 @@
 import webview
 import time
-from bfs import bfs
 import json
+from algorithms.bfs import bfs
+from algorithms.dfs import dfs
+from algorithms.ids import ids
+from algorithms.ucs import ucs
+from algorithms.astar import astar
+from algorithms.greedy import greedy
+from algorithms.ida_star import ida_star
 
 html_content = """<!DOCTYPE html><html class="light" lang="en" style="width: 100%; height: 100%; overflow: hidden;"><head>
 <meta charset="utf-8">
@@ -117,6 +123,38 @@ html_content = """<!DOCTYPE html><html class="light" lang="en" style="width: 100
             cursor: pointer; color: #434655; font-size: 8px; line-height: 1; padding: 0; transition: background 0.15s;
         }
         .spinner-btns button:hover { background: #d3daef; }
+
+        /* Algorithm dropdown */
+        .algo-dropdown { position: relative; }
+        .algo-dropdown-btn {
+            display: flex; align-items: center; gap: 6px; padding: 5px 14px;
+            background: white; border: 1.5px solid #004ac6; border-radius: 8px;
+            cursor: pointer; font-weight: 700; font-size: 13px; color: #004ac6;
+            transition: all 0.2s; font-family: 'Inter', sans-serif;
+        }
+        .algo-dropdown-btn:hover { background: #e1e8fd; }
+        .algo-dropdown-btn .arrow { font-size: 10px; transition: transform 0.2s; }
+        .algo-dropdown-btn.open .arrow { transform: rotate(180deg); }
+        .algo-dropdown-menu {
+            display: none; position: absolute; top: calc(100% + 6px); right: 0;
+            background: white; border: 1px solid #c3c6d7; border-radius: 10px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.12); z-index: 999; min-width: 220px;
+            padding: 6px 0; max-height: 340px; overflow-y: auto;
+        }
+        .algo-dropdown-menu.show { display: block; animation: dropIn 0.15s ease-out; }
+        @keyframes dropIn { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: translateY(0); } }
+        .algo-group-label {
+            padding: 8px 14px 4px; font-size: 10px; font-weight: 700;
+            text-transform: uppercase; letter-spacing: 0.08em; color: #737686;
+        }
+        .algo-item {
+            padding: 7px 14px; font-size: 13px; font-weight: 500; color: #141b2b;
+            cursor: pointer; transition: background 0.12s; display: flex; align-items: center; gap: 8px;
+        }
+        .algo-item:hover { background: #e9edff; }
+        .algo-item.active { background: #dbe1ff; color: #004ac6; font-weight: 700; }
+        .algo-item .check { font-size: 14px; color: #004ac6; visibility: hidden; }
+        .algo-item.active .check { visibility: visible; }
     </style>
 </head>
 <body class="bg-background text-on-surface text-sm flex flex-col h-screen w-screen overflow-hidden">
@@ -126,9 +164,44 @@ html_content = """<!DOCTYPE html><html class="light" lang="en" style="width: 100
         <span class="font-headline-sm text-[17px] font-bold text-on-surface">8-Puzzle Solver Simulator</span>
     </div>
     <nav class="hidden md:flex items-center gap-4">
-        <button class="flex items-center gap-1 text-primary font-bold border-b-2 border-primary pb-0.5 font-label-md text-[13px]">
-            <span>BFS (Uninformed)</span>
-        </button>
+        <div class="algo-dropdown">
+            <button class="algo-dropdown-btn" id="algo-toggle" onclick="toggleDropdown()">
+                <span id="algo-label">BFS (Uninformed)</span>
+                <span class="arrow">&#9660;</span>
+            </button>
+            <div class="algo-dropdown-menu custom-scrollbar" id="algo-menu">
+                <div class="algo-group-label">Uninformed Search</div>
+                <div class="algo-item active" data-algo="bfs" data-category="Uninformed" onclick="selectAlgo(this)">
+                    <span class="material-symbols-outlined check">check</span>
+                    Breadth-First Search (BFS)
+                </div>
+                <div class="algo-item" data-algo="dfs" data-category="Uninformed" onclick="selectAlgo(this)">
+                    <span class="material-symbols-outlined check">check</span>
+                    Depth-First Search (DFS)
+                </div>
+                <div class="algo-item" data-algo="ids" data-category="Uninformed" onclick="selectAlgo(this)">
+                    <span class="material-symbols-outlined check">check</span>
+                    Iterative Deepening (IDS)
+                </div>
+                <div class="algo-item" data-algo="ucs" data-category="Uninformed" onclick="selectAlgo(this)">
+                    <span class="material-symbols-outlined check">check</span>
+                    Uniform Cost Search (UCS)
+                </div>
+                <div class="algo-group-label" style="border-top:1px solid #e1e8fd; margin-top:4px; padding-top:10px;">Informed Search</div>
+                <div class="algo-item" data-algo="astar" data-category="Informed" onclick="selectAlgo(this)">
+                    <span class="material-symbols-outlined check">check</span>
+                    A* Search
+                </div>
+                <div class="algo-item" data-algo="greedy" data-category="Informed" onclick="selectAlgo(this)">
+                    <span class="material-symbols-outlined check">check</span>
+                    Greedy Best-First
+                </div>
+                <div class="algo-item" data-algo="ida_star" data-category="Informed" onclick="selectAlgo(this)">
+                    <span class="material-symbols-outlined check">check</span>
+                    IDA* Search
+                </div>
+            </div>
+        </div>
     </nav>
 </header>
 
@@ -379,22 +452,58 @@ async function animatePath(start_state, path) {
     document.getElementById('step-wrapper').innerHTML = `<span style="background:#0d9488; color:white; padding:3px 10px; border-radius:6px; font-size:11px; font-weight:600; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">Finished</span>`;
 }
 
-async function callBfs(mode) {
-    document.getElementById('execution-log').innerHTML = '<span class="text-outline">Đang chạy thuật toán...</span>';
+let currentAlgo = 'bfs';
+let currentCategory = 'Uninformed';
+
+const algoNames = {
+    bfs: 'BFS', dfs: 'DFS', ids: 'IDS', ucs: 'UCS',
+    astar: 'A*', greedy: 'Greedy Best-First', ida_star: 'IDA*'
+};
+
+function toggleDropdown() {
+    const menu = document.getElementById('algo-menu');
+    const btn = document.getElementById('algo-toggle');
+    menu.classList.toggle('show');
+    btn.classList.toggle('open');
+}
+
+function selectAlgo(el) {
+    document.querySelectorAll('.algo-item').forEach(x => x.classList.remove('active'));
+    el.classList.add('active');
+    currentAlgo = el.dataset.algo;
+    currentCategory = el.dataset.category;
+    document.getElementById('algo-label').textContent = algoNames[currentAlgo] + ' (' + currentCategory + ')';
+    document.getElementById('algo-menu').classList.remove('show');
+    document.getElementById('algo-toggle').classList.remove('open');
+    // Update config section title
+    const configTitle = document.querySelector('#config-title');
+    if(configTitle) configTitle.textContent = '2. ' + algoNames[currentAlgo] + ' Configuration';
+}
+
+// Close dropdown when clicking outside
+document.addEventListener('click', function(e) {
+    if(!e.target.closest('.algo-dropdown')) {
+        document.getElementById('algo-menu').classList.remove('show');
+        document.getElementById('algo-toggle').classList.remove('open');
+    }
+});
+
+async function callSolve(mode) {
+    document.getElementById('execution-log').innerHTML = '<span class="text-outline">Đang chạy thuật toán ' + algoNames[currentAlgo] + '...</span>';
     const start_state = [];
     for(let i=0; i<9; i++) {
         let val = parseInt(document.getElementById(`cell-${i}`).value);
         if(isNaN(val)) val = 0;
         start_state.push(val);
     }
-    const result = await pywebview.api.solve(start_state, mode);
+    const result = await pywebview.api.solve(start_state, mode, currentAlgo);
     if (result.success) {
         document.getElementById('stat-steps').innerText = result.depth;
         document.getElementById('stat-nodes').innerText = result.nodes.toLocaleString();
         document.getElementById('stat-time').innerText = result.time + "ms";
         document.getElementById('stat-depth').innerText = result.depth;
         
-        let logHtml = `<div class="text-primary font-bold mb-2" style="font-size:12px;">ĐANG GIẢI BẰNG: ${mode.toUpperCase()} GOAL TEST</div>`;
+        let logHtml = `<div class="text-primary font-bold mb-2" style="font-size:12px;">ĐANG GIẢI BẰNG: ${algoNames[currentAlgo].toUpperCase()} — ${mode.toUpperCase()} GOAL TEST</div>`;
         logHtml += formatLogState("Trạng thái bắt đầu:", start_state);
         result.path.forEach((step, idx) => { logHtml += formatLogState(idx+1, step[1], step[0]); });
         document.getElementById('execution-log').innerHTML = logHtml;
@@ -411,8 +520,8 @@ async function callBfs(mode) {
 }
 
 window.addEventListener('pywebviewready', function() {
-    document.getElementById('btn-early').onclick = () => callBfs('early');
-    document.getElementById('btn-late').onclick = () => callBfs('late');
+    document.getElementById('btn-early').onclick = () => callSolve('early');
+    document.getElementById('btn-late').onclick = () => callSolve('late');
     document.getElementById('btn-random').onclick = randomBoard;
     document.getElementById('btn-reset').onclick = resetBoard;
     document.getElementById('btn-load').onclick = loadExample;
@@ -422,10 +531,28 @@ window.addEventListener('pywebviewready', function() {
 </body></html>"""
 
 class Api:
-    def solve(self, start_state, mode):
+    def solve(self, start_state, mode, algorithm='bfs'):
         start_time = time.time()
         goal_state = [1, 2, 3, 4, 5, 6, 7, 8, 0]
-        path, nodes_generated = bfs(start_state, goal_state, mode)
+        
+        # Dispatch to the selected algorithm
+        if algorithm == 'bfs':
+            path, nodes_generated = bfs(start_state, goal_state, mode)
+        elif algorithm == 'dfs':
+            path, nodes_generated = dfs(start_state, goal_state, mode)
+        elif algorithm == 'ids':
+            path, nodes_generated = ids(start_state, goal_state, mode)
+        elif algorithm == 'ucs':
+            path, nodes_generated = ucs(start_state, goal_state)
+        elif algorithm == 'astar':
+            path, nodes_generated = astar(start_state, goal_state)
+        elif algorithm == 'greedy':
+            path, nodes_generated = greedy(start_state, goal_state)
+        elif algorithm == 'ida_star':
+            path, nodes_generated = ida_star(start_state, goal_state)
+        else:
+            path, nodes_generated = bfs(start_state, goal_state, mode)
+        
         end_time = time.time()
         elapsed_ms = int((end_time - start_time) * 1000)
         
