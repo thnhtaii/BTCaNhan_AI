@@ -482,6 +482,21 @@ function renderConfigUI() {
         return;
     }
     
+    if (currentAlgo === 'greedy') {
+        title.textContent = '2. Greedy Best-First Configuration';
+        title.className = 'font-bold text-[15px] text-on-surface';
+        body.innerHTML = `
+            <div class="flex flex-col items-center justify-center w-full mt-1">
+                <p class="text-center italic text-secondary mb-2.5 text-[12.5px] leading-tight">
+                    f(n) = h(n) = Khoảng cách Manhattan
+                </p>
+                <button onclick="callSolve('none')" class="w-full max-w-[240px] h-9 bg-primary text-white rounded-full flex items-center justify-center transition-all hover:bg-primary/90 cursor-pointer shadow-sm">
+                    <span class="font-bold text-[13px]">Run Greedy Best-First</span>
+                </button>
+            </div>`;
+        return;
+    }
+    
     title.className = 'font-headline-sm text-headline-sm text-on-surface';
     title.textContent = '2. ' + algoNames[currentAlgo] + ' Configuration';
     
