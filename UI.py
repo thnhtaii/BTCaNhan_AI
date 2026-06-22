@@ -159,7 +159,7 @@ html_content = """<!DOCTYPE html><html class="light" lang="en" style="width: 100
 </head>
 <body class="bg-background text-on-surface text-sm flex flex-col h-screen w-screen overflow-hidden">
 
-<header class="flex justify-between items-center px-6 min-h-[50px] h-12 w-full bg-surface-container-lowest border-b border-outline-variant shrink-0 z-50">
+<header class="flex justify-between items-center px-6 h-12 w-full bg-surface-container-lowest border-b border-outline-variant shrink-0 z-50">
     <div class="flex items-center gap-3">
         <span class="font-headline-sm text-[17px] font-bold text-on-surface">8-Puzzle Solver Simulator</span>
     </div>
@@ -282,7 +282,7 @@ html_content = """<!DOCTYPE html><html class="light" lang="en" style="width: 100
             <div id="config-body"></div>
         </section>
         
-        <section class="bg-surface-container-high border border-outline-variant rounded-xl flex flex-col shadow-sm h-[300px]">
+        <section class="bg-surface-container-high border border-outline-variant rounded-xl flex flex-col shadow-sm h-[250px]">
             <div class="flex items-center justify-between px-3 py-1.5 bg-surface-container-highest border-b border-outline-variant rounded-t-xl">
                 <div class="flex items-center gap-2">
                     <span class="material-symbols-outlined text-primary text-[15px]">terminal</span>
@@ -453,12 +453,8 @@ const algoNames = {
     astar: 'A*', greedy: 'Greedy Best-First', ida_star: 'IDA*'
 };
 
-// Which algorithms support early/late goal test
-const hasEarlyLate = ['bfs', 'dfs', 'ucs', 'astar'];
-// Which algorithms need a depth limit input
+const hasEarlyLate = ['bfs', 'dfs', 'astar'];
 const hasDepthLimit = ['ids'];
-// Which algorithms just have a Run button
-const runOnly = ['greedy', 'ida_star'];
 
 function toggleDropdown() {
     const menu = document.getElementById('algo-menu');
@@ -470,6 +466,25 @@ function toggleDropdown() {
 function renderConfigUI() {
     const body = document.getElementById('config-body');
     const title = document.getElementById('config-title');
+    
+    if (currentAlgo === 'ucs') {
+        title.textContent = '2. UCS Configuration';
+        title.className = 'font-bold text-[14px] text-on-surface';
+        body.parentElement.className = 'bg-surface-container-lowest border border-outline-variant rounded-xl px-3 py-3 shadow-sm';
+        body.innerHTML = `
+            <div class="flex flex-col items-center">
+                <p class="text-center italic text-secondary mt-2 mb-3 text-[13px] leading-normal">
+                    Chi phí hành động = Giá trị của ô số di chuyển
+                </p>
+                <button onclick="callSolve('late')" class="w-full max-w-[240px] h-9 bg-primary text-white rounded-full flex items-center justify-center transition-all hover:bg-primary/90 cursor-pointer shadow-sm">
+                    <span class="font-bold text-[13px]">Uniform Cost Search</span>
+                </button>
+            </div>`;
+        return;
+    }
+    
+    body.parentElement.className = 'bg-surface-container-lowest border border-outline-variant rounded-xl px-3 py-3 shadow-sm';
+    title.className = 'font-headline-sm text-headline-sm text-on-surface';
     title.textContent = '2. ' + algoNames[currentAlgo] + ' Configuration';
     
     if (hasEarlyLate.includes(currentAlgo)) {
@@ -529,7 +544,6 @@ function selectAlgo(el) {
     renderConfigUI();
 }
 
-// Close dropdown when clicking outside
 document.addEventListener('click', function(e) {
     if(!e.target.closest('.algo-dropdown')) {
         document.getElementById('algo-menu').classList.remove('show');
@@ -546,7 +560,6 @@ async function callSolve(mode) {
         start_state.push(val);
     }
     
-    // Get extra params based on algorithm
     let depthLimit = 50;
     const depthInput = document.getElementById('depth-limit');
     if(depthInput) depthLimit = parseInt(depthInput.value) || 50;
