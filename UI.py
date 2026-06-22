@@ -275,11 +275,11 @@ html_content = """<!DOCTYPE html><html class="light" lang="en" style="width: 100
             </div>
         </div>
         
-        <section class="bg-surface-container-lowest border border-outline-variant rounded-xl p-4 shadow-sm">
-            <div class="flex items-center justify-between mb-2 border-b border-outline-variant pb-1.5">
+        <section class="bg-surface-container-lowest border border-outline-variant rounded-xl px-4 py-5 shadow-sm min-h-[135px] flex flex-col justify-center">
+            <div class="flex items-center justify-between mb-2 border-b border-outline-variant pb-1.5 w-full">
                 <h3 id="config-title" class="font-headline-sm text-headline-sm text-on-surface">2. BFS Configuration</h3>
             </div>
-            <div id="config-body"></div>
+            <div id="config-body" class="w-full flex-1 flex flex-col justify-center"></div>
         </section>
         
         <section class="bg-surface-container-high border border-outline-variant rounded-xl flex flex-col shadow-sm h-[250px]">
@@ -469,27 +469,25 @@ function renderConfigUI() {
     
     if (currentAlgo === 'ucs') {
         title.textContent = '2. UCS Configuration';
-        title.className = 'font-bold text-[14px] text-on-surface';
-        body.parentElement.className = 'bg-surface-container-lowest border border-outline-variant rounded-xl px-3 py-3 shadow-sm';
+        title.className = 'font-bold text-[15px] text-on-surface';
         body.innerHTML = `
-            <div class="flex flex-col items-center">
-                <p class="text-center italic text-secondary mt-2 mb-3 text-[13px] leading-normal">
+            <div class="flex flex-col items-center justify-center w-full mt-1">
+                <p class="text-center italic text-secondary mb-2.5 text-[12.5px] leading-tight">
                     Chi phí hành động = Giá trị của ô số di chuyển
                 </p>
                 <button onclick="callSolve('late')" class="w-full max-w-[240px] h-9 bg-primary text-white rounded-full flex items-center justify-center transition-all hover:bg-primary/90 cursor-pointer shadow-sm">
-                    <span class="font-bold text-[13px]">Uniform Cost Search</span>
+                    <span class="font-bold text-[13px]">Run Uniform Cost Search</span>
                 </button>
             </div>`;
         return;
     }
     
-    body.parentElement.className = 'bg-surface-container-lowest border border-outline-variant rounded-xl px-3 py-3 shadow-sm';
     title.className = 'font-headline-sm text-headline-sm text-on-surface';
     title.textContent = '2. ' + algoNames[currentAlgo] + ' Configuration';
     
     if (hasEarlyLate.includes(currentAlgo)) {
         body.innerHTML = `
-            <div class="flex gap-3 justify-center">
+            <div class="flex gap-3 justify-center w-full mt-3">
                 <button id="btn-early" onclick="callSolve('early')" class="flex-1 h-9 px-4 bg-white shadow-sm border border-outline-variant rounded-full flex items-center justify-center transition-all hover:bg-surface-container-low cursor-pointer">
                     <span class="font-bold text-primary text-[13px]">Early Goal Test</span>
                 </button>
@@ -499,27 +497,27 @@ function renderConfigUI() {
             </div>`;
     } else if (hasDepthLimit.includes(currentAlgo)) {
         body.innerHTML = `
-            <div class="flex flex-col gap-3 items-center">
+            <div class="flex flex-col gap-2 items-center justify-center w-full mt-1">
                 <div class="flex items-center gap-3">
                     <span class="font-label-md text-[12px] text-on-surface-variant font-semibold">Depth Limit:</span>
                     <div class="flex items-center border border-outline-variant rounded-lg overflow-hidden">
-                        <button onclick="adjustDepth(-1)" class="w-8 h-9 flex items-center justify-center bg-surface-container-low hover:bg-surface-container-highest transition-colors cursor-pointer border-r border-outline-variant">
-                            <span class="text-primary font-bold text-[16px]">−</span>
+                        <button onclick="adjustDepth(-1)" class="w-7 h-8 flex items-center justify-center bg-surface-container-low hover:bg-surface-container-highest transition-colors cursor-pointer border-r border-outline-variant">
+                            <span class="text-primary font-bold text-[14px]">−</span>
                         </button>
-                        <input type="number" id="depth-limit" value="50" min="1" max="200" class="w-14 h-9 text-center font-headline-sm text-[16px] font-bold text-primary bg-white border-none focus:outline-none focus:ring-0">
-                        <button onclick="adjustDepth(1)" class="w-8 h-9 flex items-center justify-center bg-surface-container-low hover:bg-surface-container-highest transition-colors cursor-pointer border-l border-outline-variant">
-                            <span class="text-primary font-bold text-[16px]">+</span>
+                        <input type="number" id="depth-limit" value="50" min="1" max="200" class="w-12 h-8 text-center font-headline-sm text-[14px] font-bold text-primary bg-white border-none focus:outline-none focus:ring-0">
+                        <button onclick="adjustDepth(1)" class="w-7 h-8 flex items-center justify-center bg-surface-container-low hover:bg-surface-container-highest transition-colors cursor-pointer border-l border-outline-variant">
+                            <span class="text-primary font-bold text-[14px]">+</span>
                         </button>
                     </div>
                 </div>
-                <button onclick="callSolve('none')" class="w-full h-9 px-4 bg-primary text-white rounded-full flex items-center justify-center transition-all hover:bg-primary/90 cursor-pointer shadow-sm">
-                    <span class="font-bold text-[13px]">Run IDS</span>
+                <button onclick="callSolve('none')" class="w-full h-9 bg-primary text-white rounded-full flex items-center justify-center transition-all hover:bg-primary/90 cursor-pointer shadow-sm">
+                    <span class="font-bold text-[13px]">Run Ready IDS</span>
                 </button>
             </div>`;
     } else {
         body.innerHTML = `
-            <div class="flex justify-center">
-                <button onclick="callSolve('none')" class="w-full h-9 px-4 bg-primary text-white rounded-full flex items-center justify-center transition-all hover:bg-primary/90 cursor-pointer shadow-sm">
+            <div class="flex justify-center w-full mt-3">
+                <button onclick="callSolve('none')" class="w-full h-9 bg-primary text-white rounded-full flex items-center justify-center transition-all hover:bg-primary/90 cursor-pointer shadow-sm">
                     <span class="font-bold text-[13px]">Run ${algoNames[currentAlgo]}</span>
                 </button>
             </div>`;
@@ -604,7 +602,6 @@ class Api:
         start_time = time.time()
         goal_state = [1, 2, 3, 4, 5, 6, 7, 8, 0]
         
-        # Dispatch to the selected algorithm
         if algorithm == 'bfs':
             path, nodes_generated = bfs(start_state, goal_state, mode)
         elif algorithm == 'dfs':
