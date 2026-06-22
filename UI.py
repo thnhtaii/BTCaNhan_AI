@@ -453,7 +453,7 @@ const algoNames = {
     astar: 'A*', greedy: 'Greedy Best-First', ida_star: 'IDA*'
 };
 
-const hasEarlyLate = ['bfs', 'dfs', 'astar'];
+const hasEarlyLate = ['bfs', 'dfs'];
 const hasDepthLimit = ['ids'];
 
 function toggleDropdown() {
@@ -492,6 +492,22 @@ function renderConfigUI() {
                 </p>
                 <button onclick="callSolve('none')" class="w-full max-w-[240px] h-9 bg-primary text-white rounded-full flex items-center justify-center transition-all hover:bg-primary/90 cursor-pointer shadow-sm">
                     <span class="font-bold text-[13px]">Run Greedy Best-First</span>
+                </button>
+            </div>`;
+        return;
+    }
+    
+    if (currentAlgo === 'astar') {
+        title.textContent = '2. A* Configuration';
+        title.className = 'font-bold text-[15px] text-on-surface';
+        body.innerHTML = `
+            <div class="flex flex-col items-center justify-center w-full mt-1">
+                <p class="text-center italic text-secondary mb-2.5 text-[12.5px] leading-tight">
+                    f(n) = g(n) + h(n)<br>
+                    g(n) = Nghịch thế rời rạc | h(n) = Số ô sai vị trí
+                </p>
+                <button onclick="callSolve('late')" class="w-full max-w-[240px] h-9 bg-primary text-white rounded-full flex items-center justify-center transition-all hover:bg-primary/90 cursor-pointer shadow-sm">
+                    <span class="font-bold text-[13px]">Run A* Search</span>
                 </button>
             </div>`;
         return;
