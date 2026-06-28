@@ -259,17 +259,7 @@ html_content = """<!DOCTYPE html><html class="light" lang="en" style="width: 100
                     <h3 class="font-headline-sm text-headline-sm text-on-surface">Goal State</h3>
                     <span class="material-symbols-outlined text-primary text-[16px]">check_circle</span>
                 </div>
-                <div class="grid grid-cols-3 gap-2 mb-3.5">
-                    <div class="h-12 flex items-center justify-center bg-surface-container-low rounded-lg font-headline-sm text-[17px] font-bold text-on-surface border border-outline-variant/20">1</div>
-                    <div class="h-12 flex items-center justify-center bg-surface-container-low rounded-lg font-headline-sm text-[17px] font-bold text-on-surface border border-outline-variant/20">2</div>
-                    <div class="h-12 flex items-center justify-center bg-surface-container-low rounded-lg font-headline-sm text-[17px] font-bold text-on-surface border border-outline-variant/20">3</div>
-                    <div class="h-12 flex items-center justify-center bg-surface-container-low rounded-lg font-headline-sm text-[17px] font-bold text-on-surface border border-outline-variant/20">4</div>
-                    <div class="h-12 flex items-center justify-center bg-surface-container-low rounded-lg font-headline-sm text-[17px] font-bold text-on-surface border border-outline-variant/20">5</div>
-                    <div class="h-12 flex items-center justify-center bg-surface-container-low rounded-lg font-headline-sm text-[17px] font-bold text-on-surface border border-outline-variant/20">6</div>
-                    <div class="h-12 flex items-center justify-center bg-surface-container-low rounded-lg font-headline-sm text-[17px] font-bold text-on-surface border border-outline-variant/20">7</div>
-                    <div class="h-12 flex items-center justify-center bg-surface-container-low rounded-lg font-headline-sm text-[17px] font-bold text-on-surface border border-outline-variant/20">8</div>
-                    <div class="h-12 flex items-center justify-center bg-surface-container-lowest rounded-lg text-outline-variant border border-dashed border-outline-variant"></div>
-                </div>
+                <div class="grid grid-cols-3 gap-2 mb-3.5" id="goal-grid"></div>
             </section>
         </div>
         
@@ -422,8 +412,28 @@ function renderBoard(state) {
     });
 }
 
+function getGoalForAlgo(algo) {
+    if (localSearchAlgos.includes(algo)) {
+        return [1, 2, 3, 8, 0, 4, 7, 6, 5];
+    }
+    return [1, 2, 3, 4, 5, 6, 7, 8, 0];
+}
+
+function renderGoalGrid(goalState) {
+    const grid = document.getElementById('goal-grid');
+    if (!grid) return;
+    grid.innerHTML = '';
+    goalState.forEach(val => {
+        if(val === 0) {
+            grid.innerHTML += `<div class="h-12 flex items-center justify-center bg-surface-container-lowest rounded-lg text-outline-variant border border-dashed border-outline-variant"></div>`;
+        } else {
+            grid.innerHTML += `<div class="h-12 flex items-center justify-center bg-surface-container-low rounded-lg font-headline-sm text-[17px] font-bold text-on-surface border border-outline-variant/20">${val}</div>`;
+        }
+    });
+}
+
 function randomBoard() {
-    let nums = [1,2,3,4,5,6,7,8,0];
+    let nums = localSearchAlgos.includes(currentAlgo) ? [1, 2, 3, 8, 0, 4, 7, 6, 5] : [1, 2, 3, 4, 5, 6, 7, 8, 0];
     for(let i=nums.length-1; i>0; i--){
         const j = Math.floor(Math.random()*(i+1));
         [nums[i], nums[j]] = [nums[j], nums[i]];
@@ -432,12 +442,12 @@ function randomBoard() {
 }
 
 function resetBoard() {
-    const nums = [1,2,3,4,5,6,7,8,0];
+    const nums = localSearchAlgos.includes(currentAlgo) ? [1, 2, 3, 8, 0, 4, 7, 6, 5] : [1, 2, 3, 4, 5, 6, 7, 8, 0];
     buildInitialGrid(nums); renderBoard(nums);
 }
 
 function loadExample() {
-    const nums = [1, 8, 3, 2, 6, 4, 7, 0, 5];
+    const nums = localSearchAlgos.includes(currentAlgo) ? [2, 8, 3, 1, 6, 4, 7, 0, 5] : [1, 8, 3, 2, 6, 4, 7, 0, 5];
     buildInitialGrid(nums); renderBoard(nums);
 }
 
@@ -651,6 +661,8 @@ function selectAlgo(el) {
     document.getElementById('algo-menu').classList.remove('show');
     document.getElementById('algo-toggle').classList.remove('open');
     renderConfigUI();
+    renderGoalGrid(getGoalForAlgo(currentAlgo));
+    loadExample();
 }
 
 document.addEventListener('click', function(e) {
@@ -660,15 +672,23 @@ document.addEventListener('click', function(e) {
     }
 });
 
+function removeIcons(text) {
+    if (text === undefined || text === null) return '';
+    const str = String(text);
+    const pattern = "\\uD83D\\uDC49|\\uD83C\\uDF89|\\u274C|\\u2705|\\uD83D\\uDE80|\\uD83D\\uDD04|\\uD83D\\uDCCC|\\u2794";
+    const regex = new RegExp(pattern, "g");
+    return str.replace(regex, '').trim();
+}
+
 function formatLocalSearchLog(logData) {
     let html = '';
     logData.forEach(entry => {
         html += `<div class="mb-2 pb-2" style="border-bottom: 1px solid rgba(0,0,0,0.06);">`;
-        html += `<div class="flex items-center gap-2 mb-1"><span class="px-1.5 py-0.5 bg-primary/10 text-primary rounded font-bold text-[10px]">Bước ${entry.step}</span>`;
-        if(entry.frontier_str) html += `<span class="text-[10px] text-secondary">${entry.frontier_str}</span>`;
+        html += `<div class="flex items-center gap-2 mb-1"><span class="px-1.5 py-0.5 bg-primary/10 text-primary rounded font-bold text-[10px]">Bước ${removeIcons(entry.step)}</span>`;
+        if(entry.frontier_str) html += `<span class="text-[10px] text-secondary">${removeIcons(entry.frontier_str)}</span>`;
         html += `</div>`;
-        html += `<div class="text-[11px] leading-relaxed">${entry.action_html}</div>`;
-        if(entry.reached_str) html += `<div class="text-[10px] text-outline mt-0.5">${entry.reached_str}</div>`;
+        html += `<div class="text-[11px] leading-relaxed">${removeIcons(entry.action_html)}</div>`;
+        if(entry.reached_str) html += `<div class="text-[10px] text-outline mt-0.5">${removeIcons(entry.reached_str)}</div>`;
         html += `</div>`;
     });
     return html;
@@ -732,6 +752,7 @@ window.addEventListener('pywebviewready', function() {
     document.getElementById('btn-random').onclick = randomBoard;
     document.getElementById('btn-reset').onclick = resetBoard;
     document.getElementById('btn-load').onclick = loadExample;
+    renderGoalGrid(getGoalForAlgo(currentAlgo));
     loadExample();
     renderConfigUI();
 });
@@ -741,7 +762,10 @@ window.addEventListener('pywebviewready', function() {
 class Api:
     def solve(self, start_state, mode, algorithm='bfs', depth_limit=50, heuristic='misplaced', beam_k=3):
         start_time = time.time()
-        goal_state = [1, 2, 3, 4, 5, 6, 7, 8, 0]
+        if algorithm in ['simple_hc', 'steepest_hc', 'stochastic_hc', 'simulated_annealing', 'random_restart_hc', 'local_beam']:
+            goal_state = [1, 2, 3, 8, 0, 4, 7, 6, 5]
+        else:
+            goal_state = [1, 2, 3, 4, 5, 6, 7, 8, 0]
         log_data = None
         
         if algorithm == 'bfs':
