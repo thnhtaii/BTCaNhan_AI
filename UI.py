@@ -8,6 +8,12 @@ from algorithms.ucs import ucs
 from algorithms.astar import astar
 from algorithms.greedy import greedy
 from algorithms.ida_star import ida_star
+from algorithms.simple_hill_climbing import hill_climbing_solve as simple_hc_solve
+from algorithms.steepest_hill_climbing import hill_climbing_solve as steepest_hc_solve
+from algorithms.stochastic_hill_climbing import stochastic_hill_climbing_solve
+from algorithms.simulated_annealing import simulated_annealing_solve
+from algorithms.random_restart_hc import random_restart_hill_climbing_solve
+from algorithms.local_beam_search import local_beam_search_solve
 
 html_content = """<!DOCTYPE html><html class="light" lang="en" style="width: 100%; height: 100%; overflow: hidden;"><head>
 <meta charset="utf-8">
@@ -199,6 +205,31 @@ html_content = """<!DOCTYPE html><html class="light" lang="en" style="width: 100
                 <div class="algo-item" data-algo="ida_star" data-category="Informed" onclick="selectAlgo(this)">
                     <span class="material-symbols-outlined check">check</span>
                     IDA* Search
+                </div>
+                <div class="algo-group-label" style="border-top:1px solid #e1e8fd; margin-top:4px; padding-top:10px;">Local Search</div>
+                <div class="algo-item" data-algo="simple_hc" data-category="Local Search" onclick="selectAlgo(this)">
+                    <span class="material-symbols-outlined check">check</span>
+                    Simple Hill Climbing
+                </div>
+                <div class="algo-item" data-algo="steepest_hc" data-category="Local Search" onclick="selectAlgo(this)">
+                    <span class="material-symbols-outlined check">check</span>
+                    Steepest-Ascent HC
+                </div>
+                <div class="algo-item" data-algo="stochastic_hc" data-category="Local Search" onclick="selectAlgo(this)">
+                    <span class="material-symbols-outlined check">check</span>
+                    Stochastic Hill Climbing
+                </div>
+                <div class="algo-item" data-algo="simulated_annealing" data-category="Local Search" onclick="selectAlgo(this)">
+                    <span class="material-symbols-outlined check">check</span>
+                    Simulated Annealing
+                </div>
+                <div class="algo-item" data-algo="random_restart_hc" data-category="Local Search" onclick="selectAlgo(this)">
+                    <span class="material-symbols-outlined check">check</span>
+                    Random Restart HC
+                </div>
+                <div class="algo-item" data-algo="local_beam" data-category="Local Search" onclick="selectAlgo(this)">
+                    <span class="material-symbols-outlined check">check</span>
+                    Local Beam Search
                 </div>
             </div>
         </div>
@@ -450,11 +481,15 @@ let currentCategory = 'Uninformed';
 
 const algoNames = {
     bfs: 'BFS', dfs: 'DFS', ids: 'IDS', ucs: 'UCS',
-    astar: 'A*', greedy: 'Greedy Best-First', ida_star: 'IDA*'
+    astar: 'A*', greedy: 'Greedy Best-First', ida_star: 'IDA*',
+    simple_hc: 'Simple Hill Climbing', steepest_hc: 'Steepest-Ascent HC',
+    stochastic_hc: 'Stochastic HC', simulated_annealing: 'Simulated Annealing',
+    random_restart_hc: 'Random Restart HC', local_beam: 'Local Beam Search'
 };
 
 const hasEarlyLate = ['bfs', 'dfs'];
 const hasDepthLimit = ['ids'];
+const localSearchAlgos = ['simple_hc', 'steepest_hc', 'stochastic_hc', 'simulated_annealing', 'random_restart_hc', 'local_beam'];
 
 function toggleDropdown() {
     const menu = document.getElementById('algo-menu');
@@ -513,6 +548,44 @@ function renderConfigUI() {
         return;
     }
     
+    if (localSearchAlgos.includes(currentAlgo)) {
+        title.textContent = '2. ' + algoNames[currentAlgo] + ' Configuration';
+        title.className = 'font-bold text-[15px] text-on-surface';
+        let configHtml = '<div class="flex flex-col items-center justify-center w-full mt-1">';
+        
+        if (currentAlgo === 'simple_hc' || currentAlgo === 'steepest_hc' || currentAlgo === 'stochastic_hc') {
+            configHtml += `<p class="text-center italic text-secondary mb-2 text-[12.5px] leading-tight">Chọn heuristic:</p>
+                <div class="flex gap-2 mb-2.5 w-full max-w-[280px]">
+                    <label class="flex-1 flex items-center gap-1.5 cursor-pointer px-2 py-1.5 rounded-lg border border-outline-variant hover:bg-surface-container-low transition-colors">
+                        <input type="radio" name="hc-heuristic" value="misplaced" checked class="accent-primary"> <span class="text-[11.5px] font-semibold">Số ô sai</span>
+                    </label>
+                    <label class="flex-1 flex items-center gap-1.5 cursor-pointer px-2 py-1.5 rounded-lg border border-outline-variant hover:bg-surface-container-low transition-colors">
+                        <input type="radio" name="hc-heuristic" value="manhattan" class="accent-primary"> <span class="text-[11.5px] font-semibold">Manhattan</span>
+                    </label>
+                </div>`;
+        } else if (currentAlgo === 'simulated_annealing') {
+            configHtml += `<p class="text-center italic text-secondary mb-2 text-[12.5px] leading-tight">h(n) = Số ô sai vị trí<br>T₀ = 1000, α = 0.95</p>`;
+        } else if (currentAlgo === 'random_restart_hc') {
+            configHtml += `<p class="text-center italic text-secondary mb-2 text-[12.5px] leading-tight">h(n) = Manhattan | Max restarts = 20</p>`;
+        } else if (currentAlgo === 'local_beam') {
+            configHtml += `<p class="text-center italic text-secondary mb-1.5 text-[12.5px] leading-tight">h(n) = Manhattan</p>
+                <div class="flex items-center gap-3 mb-2.5">
+                    <span class="font-label-md text-[12px] text-on-surface-variant font-semibold">Beam k:</span>
+                    <div class="flex items-center border border-outline-variant rounded-lg overflow-hidden">
+                        <button onclick="adjustBeamK(-1)" class="w-7 h-8 flex items-center justify-center bg-surface-container-low hover:bg-surface-container-highest transition-colors cursor-pointer border-r border-outline-variant"><span class="text-primary font-bold text-[14px]">−</span></button>
+                        <input type="number" id="beam-k" value="3" min="1" max="20" class="w-12 h-8 text-center font-headline-sm text-[14px] font-bold text-primary bg-white border-none focus:outline-none focus:ring-0">
+                        <button onclick="adjustBeamK(1)" class="w-7 h-8 flex items-center justify-center bg-surface-container-low hover:bg-surface-container-highest transition-colors cursor-pointer border-l border-outline-variant"><span class="text-primary font-bold text-[14px]">+</span></button>
+                    </div>
+                </div>`;
+        }
+        
+        configHtml += `<button onclick="callSolve('none')" class="w-full max-w-[240px] h-9 bg-primary text-white rounded-full flex items-center justify-center transition-all hover:bg-primary/90 cursor-pointer shadow-sm">
+            <span class="font-bold text-[13px]">Run ${algoNames[currentAlgo]}</span>
+        </button></div>`;
+        body.innerHTML = configHtml;
+        return;
+    }
+    
     title.className = 'font-headline-sm text-headline-sm text-on-surface';
     title.textContent = '2. ' + algoNames[currentAlgo] + ' Configuration';
     
@@ -562,6 +635,13 @@ function adjustDepth(delta) {
     input.value = val;
 }
 
+function adjustBeamK(delta) {
+    const input = document.getElementById('beam-k');
+    let val = parseInt(input.value) || 3;
+    val = Math.max(1, Math.min(20, val + delta));
+    input.value = val;
+}
+
 function selectAlgo(el) {
     document.querySelectorAll('.algo-item').forEach(x => x.classList.remove('active'));
     el.classList.add('active');
@@ -580,6 +660,20 @@ document.addEventListener('click', function(e) {
     }
 });
 
+function formatLocalSearchLog(logData) {
+    let html = '';
+    logData.forEach(entry => {
+        html += `<div class="mb-2 pb-2" style="border-bottom: 1px solid rgba(0,0,0,0.06);">`;
+        html += `<div class="flex items-center gap-2 mb-1"><span class="px-1.5 py-0.5 bg-primary/10 text-primary rounded font-bold text-[10px]">Bước ${entry.step}</span>`;
+        if(entry.frontier_str) html += `<span class="text-[10px] text-secondary">${entry.frontier_str}</span>`;
+        html += `</div>`;
+        html += `<div class="text-[11px] leading-relaxed">${entry.action_html}</div>`;
+        if(entry.reached_str) html += `<div class="text-[10px] text-outline mt-0.5">${entry.reached_str}</div>`;
+        html += `</div>`;
+    });
+    return html;
+}
+
 async function callSolve(mode) {
     document.getElementById('execution-log').innerHTML = '<span class="text-outline">Đang chạy thuật toán ' + algoNames[currentAlgo] + '...</span>';
     const start_state = [];
@@ -593,7 +687,15 @@ async function callSolve(mode) {
     const depthInput = document.getElementById('depth-limit');
     if(depthInput) depthLimit = parseInt(depthInput.value) || 50;
     
-    const result = await pywebview.api.solve(start_state, mode, currentAlgo, depthLimit);
+    let heuristic = 'misplaced';
+    const hRadio = document.querySelector('input[name="hc-heuristic"]:checked');
+    if(hRadio) heuristic = hRadio.value;
+    
+    let beamK = 3;
+    const beamInput = document.getElementById('beam-k');
+    if(beamInput) beamK = parseInt(beamInput.value) || 3;
+    
+    const result = await pywebview.api.solve(start_state, mode, currentAlgo, depthLimit, heuristic, beamK);
     const modeLabel = mode === 'none' ? '' : ' — ' + mode.toUpperCase() + ' GOAL TEST';
     
     if (result.success) {
@@ -603,12 +705,20 @@ async function callSolve(mode) {
         document.getElementById('stat-depth').innerText = result.depth;
         
         let logHtml = `<div class="text-primary font-bold mb-2" style="font-size:12px;">ĐANG GIẢI BẰNG: ${algoNames[currentAlgo].toUpperCase()}${modeLabel}</div>`;
-        logHtml += formatLogState("Trạng thái bắt đầu:", start_state);
-        result.path.forEach((step, idx) => { logHtml += formatLogState(idx+1, step[1], step[0]); });
+        if (result.log_data && result.log_data.length > 0) {
+            logHtml += formatLocalSearchLog(result.log_data);
+        } else {
+            logHtml += formatLogState("Trạng thái bắt đầu:", start_state);
+            result.path.forEach((step, idx) => { logHtml += formatLogState(idx+1, step[1], step[0]); });
+        }
         document.getElementById('execution-log').innerHTML = logHtml;
         animatePath(start_state, result.path);
     } else {
-        document.getElementById('execution-log').innerHTML = '<div class="text-red-600 font-bold" style="font-size:12px;">Không tìm thấy giải pháp!</div>';
+        let failHtml = '<div class="text-red-600 font-bold" style="font-size:12px;">Không tìm thấy giải pháp!</div>';
+        if (result.log_data && result.log_data.length > 0) {
+            failHtml += formatLocalSearchLog(result.log_data);
+        }
+        document.getElementById('execution-log').innerHTML = failHtml;
         document.getElementById('stat-steps').innerText = "-";
         document.getElementById('stat-nodes').innerText = result.nodes.toLocaleString();
         document.getElementById('stat-time').innerText = result.time + "ms";
@@ -629,9 +739,10 @@ window.addEventListener('pywebviewready', function() {
 </body></html>"""
 
 class Api:
-    def solve(self, start_state, mode, algorithm='bfs', depth_limit=50):
+    def solve(self, start_state, mode, algorithm='bfs', depth_limit=50, heuristic='misplaced', beam_k=3):
         start_time = time.time()
         goal_state = [1, 2, 3, 4, 5, 6, 7, 8, 0]
+        log_data = None
         
         if algorithm == 'bfs':
             path, nodes_generated = bfs(start_state, goal_state, mode)
@@ -647,6 +758,19 @@ class Api:
             path, nodes_generated = greedy(start_state, goal_state)
         elif algorithm == 'ida_star':
             path, nodes_generated = ida_star(start_state, goal_state)
+        elif algorithm == 'simple_hc':
+            path, nodes_generated, log_data = simple_hc_solve(start_state, goal_state, heuristic)
+        elif algorithm == 'steepest_hc':
+            path, nodes_generated, log_data = steepest_hc_solve(start_state, goal_state, heuristic)
+        elif algorithm == 'stochastic_hc':
+            path, nodes_generated, log_data = stochastic_hill_climbing_solve(start_state, goal_state, heuristic)
+        elif algorithm == 'simulated_annealing':
+            path, nodes_generated, log_data = simulated_annealing_solve(start_state, goal_state)
+        elif algorithm == 'random_restart_hc':
+            result = random_restart_hill_climbing_solve(start_state, goal_state)
+            path, nodes_generated, log_data = result[0], result[1], result[2]
+        elif algorithm == 'local_beam':
+            path, nodes_generated, log_data = local_beam_search_solve(start_state, goal_state, k=beam_k)
         else:
             path, nodes_generated = bfs(start_state, goal_state, mode)
         
@@ -654,9 +778,20 @@ class Api:
         elapsed_ms = int((end_time - start_time) * 1000)
         
         if path is not None:
-            return {"success": True, "path": path, "nodes": nodes_generated, "time": elapsed_ms, "depth": len(path)}
+            result = {"success": True, "path": path, "nodes": nodes_generated, "time": elapsed_ms, "depth": len(path)}
         else:
-            return {"success": False, "nodes": nodes_generated, "time": elapsed_ms}
+            result = {"success": False, "nodes": nodes_generated, "time": elapsed_ms}
+        
+        if log_data is not None:
+            result["log_data"] = log_data
+            if path is not None and len(path) == 0 and log_data:
+                # Local search may return empty path but not None when stuck
+                last_log = log_data[-1] if log_data else {}
+                action_html = last_log.get('action_html', '')
+                if 'THÀNH CÔNG' not in action_html and 'Đã đạt đích' not in action_html:
+                    result["success"] = False
+        
+        return result
 
 if __name__ == '__main__':
     api = Api()

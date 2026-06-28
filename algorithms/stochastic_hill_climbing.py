@@ -1,0 +1,100 @@
+import time
+import random
+
+def get_successors(mt):
+    pos = mt.index(0)
+    r, c = pos // 3, pos % 3
+    successors = []
+    def swap(mt, i, j):
+        new_mt = list(mt)
+        new_mt[i], new_mt[j] = new_mt[j], new_mt[i]
+        return new_mt, new_mt[i]
+    if c > 0: 
+        new_state, cost = swap(mt, pos, pos - 1)
+        successors.append(("Trái", new_state, cost))
+    if c < 2: 
+        new_state, cost = swap(mt, pos, pos + 1)
+        successors.append(("Phải", new_state, cost))
+    if r > 0: 
+        new_state, cost = swap(mt, pos, pos - 3)
+        successors.append(("Lên", new_state, cost))
+    if r < 2: 
+        new_state, cost = swap(mt, pos, pos + 3)
+        successors.append(("Xuống", new_state, cost))
+    return successors
+
+def count_misplaced(mt, goal):
+    misplaced = 0
+    for i in range(9):
+        if mt[i] != 0 and mt[i] != goal[i]:
+            misplaced += 1
+    return misplaced
+
+def count_manhattan(mt, goal):
+    dist = 0
+    for i in range(9):
+        val = mt[i]
+        if val != 0:
+            r, c = i // 3, i % 3
+            goal_idx = goal.index(val)
+            gr, gc = goal_idx // 3, goal_idx % 3
+            dist += abs(r - gr) + abs(c - gc)
+    return dist
+
+def stochastic_hill_climbing_solve(start_state, goal_state, heuristic_name="misplaced"):
+    """
+    Thuật toán Stochastic Hill Climbing cho 8-puzzle.
+    Tìm tất cả các nút con tốt hơn, sau đó chọn NGẪU NHIÊN một nút.
+    """
+    log_data = []
+    if heuristic_name == "manhattan":
+        def h(state): return count_manhattan(state, goal_state)
+        h_label = "Manhattan"
+    else:
+        def h(state): return count_misplaced(state, goal_state)
+        h_label = "Số ô sai"
+    current_state = list(start_state)
+    current_h = h(current_state)
+    path = []
+    nodes_generated = 1
+    step_count = 0
+    log_data.append({"step": 0, "action_html": f"Khởi tạo trạng thái bắt đầu S với h({h_label}) = {current_h}", "frontier_str": f"Hiện tại: S(h={current_h})", "reached_str": f"Đường đi: [S]"})
+    while True:
+        if current_state == goal_state:
+            log_data.append({"step": step_count + 1, "action_html": f"Trạng thái hiện tại trùng khớp hoàn toàn với Goal.<br>👉 THUẬT TOÁN DỪNG VÀ TRẢ VỀ THÀNH CÔNG 🎉", "frontier_str": "Đã đạt đích!", "reached_str": "Thành công!"})
+            break
+        successors = get_successors(current_state)
+        children_logs = []
+        better_children = []
+        for action, child, _ in successors:
+            child_h = h(child)
+            nodes_generated += 1
+            if child_h < current_h:
+                better_children.append((action, child, child_h))
+                status_str = f"<b style='color: #0d6e35;'>TỐT HƠN</b> (h={child_h} < h_hiện_tại={current_h})"
+            else:
+                status_str = f"<span style='color: #d62728;'>LOẠI</span> (h={child_h} >= h_hiện_tại={current_h})"
+            children_logs.append((action, child_h, status_str))
+        step_count += 1
+        curr_name = "S" if step_count == 1 else f"N_{step_count-1}"
+        next_name = f"N_{step_count}"
+        action_html = f"Xét trạng thái hiện tại {curr_name} (h = {current_h}):<br>"
+        action_html += f"Sinh ra {len(successors)} nút con và đánh giá TẤT CẢ:<br>"
+        for act, ch, status in children_logs:
+            action_html += f"- Di chuyển {act}: h = {ch} &rarr; {status}<br>"
+        if better_children:
+            chosen_action, chosen_state, chosen_h = random.choice(better_children)
+            path.append((chosen_action, chosen_state))
+            better_names = [f"{act}(h={ch})" for act, _, ch in better_children]
+            action_html += f"<br>Các nút tốt hơn: {', '.join(better_names)}<br>"
+            action_html += f"👉 <b>CHỌN NGẪU NHIÊN</b>: Di chuyển sang <b>{chosen_action}</b> ({next_name}) có h = {chosen_h}."
+            current_state = chosen_state
+            current_h = chosen_h
+            path_names = ["S"] + [f"N_{i+1}" for i in range(len(path))]
+            log_data.append({"step": step_count, "action_html": action_html, "frontier_str": f"Hiện tại: {next_name}(h={current_h})", "reached_str": " &rarr; ".join(path_names)})
+        else:
+            action_html += f"<br><b style='color: #d62728;'>CẢNH BÁO:</b> Không tìm thấy nút con nào có h tốt hơn h_hiện_tại = {current_h}!<br>"
+            action_html += f"👉 <b>THUẬT TOÁN DỪNG VÀ BỊ KẸT TẠI CỰC TRỊ ĐỊA PHƯƠNG (LOCAL OPTIMUM)</b> ❌"
+            log_data.append({"step": step_count, "action_html": action_html, "frontier_str": f"Bị kẹt tại: {curr_name}(h={current_h})", "reached_str": "Kẹt cực trị địa phương!"})
+            break
+    return path, nodes_generated, log_data
