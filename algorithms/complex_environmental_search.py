@@ -241,10 +241,11 @@ def partial_observable_search_solve(start_state, goal_state, start_state_2=None)
     if found_path is not None:
         temp_belief = initial_belief
         temp_actual = start_state
+        list_b = list(temp_belief)
         log_data.append({
             "step": 0,
-            "action_html": f"Trạng thái niềm tin bắt đầu (Blank ở {temp_actual.index(0)}):",
-            "frontier_str": format_po_states_ascii(temp_actual, temp_belief),
+            "action_html": f"Trạng thái niềm tin bắt đầu (Quan sát ô trống ở {temp_actual.index(0)}):",
+            "frontier_str": format_two_states_ascii(list_b[0], list_b[1] if len(list_b) > 1 else list_b[0]),
             "reached_str": ""
         })
         for idx, (action, act_states) in enumerate(found_path):
@@ -253,10 +254,11 @@ def partial_observable_search_solve(start_state, goal_state, start_state_2=None)
             percept = temp_actual.index(0)
             temp_belief = {s for s in pred if s.index(0) == percept}
             
+            list_b = list(temp_belief)
             log_data.append({
                 "step": idx + 1,
                 "action_html": f"Di chuyển ô trống sang <b>{action}</b> (Quan sát thấy ô trống ở vị trí {percept})",
-                "frontier_str": format_po_states_ascii(temp_actual, temp_belief),
+                "frontier_str": format_two_states_ascii(list_b[0], list_b[1] if len(list_b) > 1 else list_b[0]),
                 "reached_str": ""
             })
     else:
