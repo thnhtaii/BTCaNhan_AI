@@ -248,7 +248,7 @@ html_content = """<!DOCTYPE html><html class="light" lang="en" style="width: 100
                 </div>
                 <div class="algo-item" data-algo="partial_observable" data-category="Complex Environments" onclick="selectAlgo(this)">
                     <span class="material-symbols-outlined check">check</span>
-                    Searching for partially observable problems
+                    Belief State & Goal
                 </div>
             </div>
         </div>
@@ -520,13 +520,60 @@ function renderGoalGrid(goalState) {
     const grid = document.getElementById('goal-grid');
     if (!grid) return;
     grid.innerHTML = '';
-    goalState.forEach(val => {
-        if(val === 0) {
-            grid.innerHTML += `<div class="h-12 flex items-center justify-center bg-surface-container-lowest rounded-lg text-outline-variant border border-dashed border-outline-variant"></div>`;
-        } else {
-            grid.innerHTML += `<div class="h-12 flex items-center justify-center bg-surface-container-low rounded-lg font-headline-sm text-[17px] font-bold text-on-surface border border-outline-variant/20">${val}</div>`;
-        }
-    });
+    
+    if (currentAlgo === 'partial_observable') {
+        grid.className = "flex gap-4 w-full justify-between mb-3.5";
+        
+        const goal1 = [1, 2, 3, 8, 0, 4, 7, 6, 5];
+        const goal2 = [1, 2, 3, 4, 5, 6, 7, 8, 0];
+        
+        // Render Đích 1
+        const wrapper1 = document.createElement('div');
+        wrapper1.className = 'flex-1';
+        wrapper1.innerHTML = '<div class="text-[11px] font-bold text-secondary mb-1">Đích 1</div>';
+        const subGrid1 = document.createElement('div');
+        subGrid1.className = 'grid grid-cols-3 gap-1.5';
+        goal1.forEach(val => {
+            const cell = document.createElement('div');
+            if (val === 0) {
+                cell.className = "h-8 flex items-center justify-center bg-surface-container-lowest rounded-lg text-outline-variant border border-dashed border-outline-variant";
+            } else {
+                cell.className = "h-8 flex items-center justify-center bg-surface-container-low rounded-lg font-headline-sm text-[13px] font-bold text-on-surface border border-outline-variant/20";
+                cell.innerText = val;
+            }
+            subGrid1.appendChild(cell);
+        });
+        wrapper1.appendChild(subGrid1);
+        grid.appendChild(wrapper1);
+        
+        // Render Đích 2
+        const wrapper2 = document.createElement('div');
+        wrapper2.className = 'flex-1';
+        wrapper2.innerHTML = '<div class="text-[11px] font-bold text-secondary mb-1">Đích 2</div>';
+        const subGrid2 = document.createElement('div');
+        subGrid2.className = 'grid grid-cols-3 gap-1.5';
+        goal2.forEach(val => {
+            const cell = document.createElement('div');
+            if (val === 0) {
+                cell.className = "h-8 flex items-center justify-center bg-surface-container-lowest rounded-lg text-outline-variant border border-dashed border-outline-variant";
+            } else {
+                cell.className = "h-8 flex items-center justify-center bg-surface-container-low rounded-lg font-headline-sm text-[13px] font-bold text-on-surface border border-outline-variant/20";
+                cell.innerText = val;
+            }
+            subGrid2.appendChild(cell);
+        });
+        wrapper2.appendChild(subGrid2);
+        grid.appendChild(wrapper2);
+    } else {
+        grid.className = "grid grid-cols-3 gap-2 mb-3.5";
+        goalState.forEach(val => {
+            if(val === 0) {
+                grid.innerHTML += `<div class="h-12 flex items-center justify-center bg-surface-container-lowest rounded-lg text-outline-variant border border-dashed border-outline-variant"></div>`;
+            } else {
+                grid.innerHTML += `<div class="h-12 flex items-center justify-center bg-surface-container-low rounded-lg font-headline-sm text-[17px] font-bold text-on-surface border border-outline-variant/20">${val}</div>`;
+            }
+        });
+    }
 }
 
 function getSolvableNeighborJS(state) {
@@ -639,7 +686,7 @@ const algoNames = {
     random_restart_hc: 'Random Restart HC', local_beam: 'Local Beam Search',
     and_or: 'AND-OR Graph Search',
     sensorless: 'Belief State',
-    partial_observable: 'Searching for partially observable problems'
+    partial_observable: 'Belief State & Goal'
 };
 
 const hasEarlyLate = ['bfs', 'dfs'];
@@ -758,8 +805,6 @@ function renderConfigUI() {
                         <button onclick="adjustDepth(1)" class="w-7 h-8 flex items-center justify-center bg-surface-container-low hover:bg-surface-container-highest transition-colors cursor-pointer border-l border-outline-variant"><span class="text-primary font-bold text-[14px]">+</span></button>
                     </div>
                 </div>`;
-        } else if (currentAlgo === 'partial_observable') {
-            configHtml += `<p class="text-center italic text-secondary mb-2.5 text-[12.5px] leading-tight">Quan sát một phần (Partially Observable).<br>Quan sát vị trí ô trống ở mỗi bước đi.</p>`;
         }
         
         configHtml += `<button onclick="callSolve('none')" class="w-full max-w-[240px] h-9 bg-primary text-white rounded-full flex items-center justify-center transition-all hover:bg-primary/90 cursor-pointer shadow-sm">

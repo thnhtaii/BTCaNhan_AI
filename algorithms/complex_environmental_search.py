@@ -214,9 +214,11 @@ def partial_observable_search_solve(start_state, goal_state, start_state_2=None)
     while frontier and nodes_generated < max_nodes:
         curr_belief, path, curr_actual = frontier.popleft()
         
-        if len(curr_belief) == 1 and list(curr_belief)[0] == tuple(goal_state):
-            found_path = path
-            break
+        if len(curr_belief) == 1:
+            belief_s = list(curr_belief)[0]
+            if list(belief_s) == [1, 2, 3, 8, 0, 4, 7, 6, 5] or list(belief_s) == [1, 2, 3, 4, 5, 6, 7, 8, 0]:
+                found_path = path
+                break
             
         for action in ["Lên", "Xuống", "Trái", "Phải"]:
             next_actual = result_state(curr_actual, action)
