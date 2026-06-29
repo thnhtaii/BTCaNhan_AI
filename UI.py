@@ -14,6 +14,12 @@ from algorithms.stochastic_hill_climbing import stochastic_hill_climbing_solve
 from algorithms.simulated_annealing import simulated_annealing_solve
 from algorithms.random_restart_hc import random_restart_hill_climbing_solve
 from algorithms.local_beam_search import local_beam_search_solve
+from algorithms.complex_environmental_search import (
+    and_or_graph_search_solve,
+    sensorless_search_solve,
+    partial_observable_search_solve,
+    get_one_alternate_state
+)
 
 html_content = """<!DOCTYPE html><html class="light" lang="en" style="width: 100%; height: 100%; overflow: hidden;"><head>
 <meta charset="utf-8">
@@ -231,6 +237,19 @@ html_content = """<!DOCTYPE html><html class="light" lang="en" style="width: 100
                     <span class="material-symbols-outlined check">check</span>
                     Local Beam Search
                 </div>
+                <div class="algo-group-label" style="border-top:1px solid #e1e8fd; margin-top:4px; padding-top:10px;">Complex Environments</div>
+                <div class="algo-item" data-algo="and_or" data-category="Complex Environments" onclick="selectAlgo(this)">
+                    <span class="material-symbols-outlined check">check</span>
+                    AND-OR Graph Search
+                </div>
+                <div class="algo-item" data-algo="sensorless" data-category="Complex Environments" onclick="selectAlgo(this)">
+                    <span class="material-symbols-outlined check">check</span>
+                    Searching with no observation
+                </div>
+                <div class="algo-item" data-algo="partial_observable" data-category="Complex Environments" onclick="selectAlgo(this)">
+                    <span class="material-symbols-outlined check">check</span>
+                    Searching for partially observable problems
+                </div>
             </div>
         </div>
     </nav>
@@ -402,18 +421,43 @@ function updateBoardPreview() {
 
 function renderBoard(state) {
     const board = document.getElementById('anim-board');
-    board.innerHTML = '';
-    state.forEach(val => {
-        if(val === 0) {
-            board.innerHTML += `<div class="aspect-square bg-surface-container-highest/20 rounded-lg border-2 border-dashed border-outline-variant"></div>`;
-        } else {
-            board.innerHTML += `<div class="aspect-square bg-white shadow-sm border border-outline-variant rounded-lg flex items-center justify-center font-headline-lg text-headline-lg text-primary">${val}</div>`;
-        }
-    });
+    if (Array.isArray(state) && state.length === 2 && Array.isArray(state[0])) {
+        // Dual state rendering (conformant or PO search)
+        board.className = "w-full max-w-[320px] aspect-auto bg-surface-container-low rounded-xl p-2 flex gap-4 justify-center relative overflow-hidden";
+        board.innerHTML = '';
+        state.forEach((s, boardIdx) => {
+            let label = boardIdx === 0 ? "Mô hình 1" : "Mô hình 2";
+            if (currentAlgo === 'partial_observable') {
+                label = boardIdx === 0 ? "Thực tế" : "Niềm tin";
+            }
+            let boardHtml = `<div class="flex flex-col items-center gap-1">
+                <span class="text-[9px] font-bold text-secondary uppercase">${label}</span>
+                <div class="grid grid-cols-3 gap-1 w-[120px] aspect-square bg-white/60 p-1.5 rounded-lg border border-outline-variant">`;
+            s.forEach(val => {
+                if(val === 0) {
+                    boardHtml += `<div class="aspect-square bg-surface-container-highest/20 rounded border border-dashed border-outline-variant"></div>`;
+                } else {
+                    boardHtml += `<div class="aspect-square bg-white shadow-sm border border-outline-variant rounded flex items-center justify-center font-bold text-[13px] text-primary">${val}</div>`;
+                }
+            });
+            boardHtml += `</div></div>`;
+            board.innerHTML += boardHtml;
+        });
+    } else {
+        board.className = "w-full max-w-[210px] aspect-square bg-surface-container-low rounded-xl p-2 grid grid-cols-3 gap-2 relative overflow-hidden";
+        board.innerHTML = '';
+        state.forEach(val => {
+            if(val === 0) {
+                board.innerHTML += `<div class="aspect-square bg-surface-container-highest/20 rounded-lg border-2 border-dashed border-outline-variant"></div>`;
+            } else {
+                board.innerHTML += `<div class="aspect-square bg-white shadow-sm border border-outline-variant rounded-lg flex items-center justify-center font-headline-lg text-headline-lg text-primary">${val}</div>`;
+            }
+        });
+    }
 }
 
 function getGoalForAlgo(algo) {
-    if (localSearchAlgos.includes(algo)) {
+    if (localSearchAlgos.includes(algo) || complexEnvAlgos.includes(algo)) {
         return [1, 2, 3, 8, 0, 4, 7, 6, 5];
     }
     return [1, 2, 3, 4, 5, 6, 7, 8, 0];
@@ -433,7 +477,7 @@ function renderGoalGrid(goalState) {
 }
 
 function randomBoard() {
-    let nums = localSearchAlgos.includes(currentAlgo) ? [1, 2, 3, 8, 0, 4, 7, 6, 5] : [1, 2, 3, 4, 5, 6, 7, 8, 0];
+    let nums = (localSearchAlgos.includes(currentAlgo) || complexEnvAlgos.includes(currentAlgo)) ? [1, 2, 3, 8, 0, 4, 7, 6, 5] : [1, 2, 3, 4, 5, 6, 7, 8, 0];
     for(let i=nums.length-1; i>0; i--){
         const j = Math.floor(Math.random()*(i+1));
         [nums[i], nums[j]] = [nums[j], nums[i]];
@@ -442,12 +486,12 @@ function randomBoard() {
 }
 
 function resetBoard() {
-    const nums = localSearchAlgos.includes(currentAlgo) ? [1, 2, 3, 8, 0, 4, 7, 6, 5] : [1, 2, 3, 4, 5, 6, 7, 8, 0];
+    const nums = (localSearchAlgos.includes(currentAlgo) || complexEnvAlgos.includes(currentAlgo)) ? [1, 2, 3, 8, 0, 4, 7, 6, 5] : [1, 2, 3, 4, 5, 6, 7, 8, 0];
     buildInitialGrid(nums); renderBoard(nums);
 }
 
 function loadExample() {
-    const nums = localSearchAlgos.includes(currentAlgo) ? [2, 8, 3, 1, 6, 4, 7, 0, 5] : [1, 8, 3, 2, 6, 4, 7, 0, 5];
+    const nums = (localSearchAlgos.includes(currentAlgo) || complexEnvAlgos.includes(currentAlgo)) ? [2, 8, 3, 1, 6, 4, 7, 0, 5] : [1, 8, 3, 2, 6, 4, 7, 0, 5];
     buildInitialGrid(nums); renderBoard(nums);
 }
 
@@ -471,9 +515,13 @@ function formatLogState(title, state, action=null) {
     `;
 }
 
-async function animatePath(start_state, path) {
+async function animatePath(start_state, path, start_dual=null) {
     clearTimeout(animationTimeout);
-    renderBoard(start_state);
+    if (start_dual) {
+        renderBoard(start_dual);
+    } else {
+        renderBoard(start_state);
+    }
     
     document.getElementById('step-wrapper').innerHTML = `<span id="step-label" class="px-2.5 py-0.5 bg-surface-container-high text-on-surface-variant rounded font-semibold text-label-md">Step 0/${path.length}</span>`;
     
@@ -494,12 +542,16 @@ const algoNames = {
     astar: 'A*', greedy: 'Greedy Best-First', ida_star: 'IDA*',
     simple_hc: 'Simple Hill Climbing', steepest_hc: 'Steepest-Ascent HC',
     stochastic_hc: 'Stochastic HC', simulated_annealing: 'Simulated Annealing',
-    random_restart_hc: 'Random Restart HC', local_beam: 'Local Beam Search'
+    random_restart_hc: 'Random Restart HC', local_beam: 'Local Beam Search',
+    and_or: 'AND-OR Graph Search',
+    sensorless: 'Searching with no observation',
+    partial_observable: 'Searching for partially observable problems'
 };
 
 const hasEarlyLate = ['bfs', 'dfs'];
 const hasDepthLimit = ['ids'];
 const localSearchAlgos = ['simple_hc', 'steepest_hc', 'stochastic_hc', 'simulated_annealing', 'random_restart_hc', 'local_beam'];
+const complexEnvAlgos = ['and_or', 'sensorless', 'partial_observable'];
 
 function toggleDropdown() {
     const menu = document.getElementById('algo-menu');
@@ -596,6 +648,35 @@ function renderConfigUI() {
         return;
     }
     
+    if (complexEnvAlgos.includes(currentAlgo)) {
+        title.textContent = '2. ' + algoNames[currentAlgo] + ' Configuration';
+        title.className = 'font-bold text-[15px] text-on-surface';
+        let configHtml = '<div class="flex flex-col items-center justify-center w-full mt-1">';
+        
+        if (currentAlgo === 'and_or') {
+            configHtml += `<p class="text-center italic text-secondary mb-1.5 text-[12.5px] leading-tight">Môi trường phức tạp, tìm kiếm dưới dạng AND-OR</p>
+                <div class="flex items-center gap-3 mb-2.5">
+                    <span class="font-label-md text-[12px] text-on-surface-variant font-semibold">Giới hạn:</span>
+                    <div class="flex items-center border border-outline-variant rounded-lg overflow-hidden">
+                        <button onclick="adjustDepth(-1)" class="w-7 h-8 flex items-center justify-center bg-surface-container-low hover:bg-surface-container-highest transition-colors cursor-pointer border-r border-outline-variant"><span class="text-primary font-bold text-[14px]">−</span></button>
+                        <input type="number" id="depth-limit" value="15" min="1" max="50" class="w-12 h-8 text-center font-headline-sm text-[14px] font-bold text-primary bg-white border-none focus:outline-none focus:ring-0">
+                        <input type="hidden" id="beam-k" value="3">
+                        <button onclick="adjustDepth(1)" class="w-7 h-8 flex items-center justify-center bg-surface-container-low hover:bg-surface-container-highest transition-colors cursor-pointer border-l border-outline-variant"><span class="text-primary font-bold text-[14px]">+</span></button>
+                    </div>
+                </div>`;
+        } else if (currentAlgo === 'sensorless') {
+            configHtml += `<p class="text-center italic text-secondary mb-2.5 text-[12.5px] leading-tight">Conformant Search (Không quan sát).<br>Tự động tạo 3 trạng thái niềm tin (Belief States) ban đầu.</p>`;
+        } else if (currentAlgo === 'partial_observable') {
+            configHtml += `<p class="text-center italic text-secondary mb-2.5 text-[12.5px] leading-tight">Quan sát một phần (Partially Observable).<br>Quan sát vị trí ô trống ở mỗi bước đi.</p>`;
+        }
+        
+        configHtml += `<button onclick="callSolve('none')" class="w-full max-w-[240px] h-9 bg-primary text-white rounded-full flex items-center justify-center transition-all hover:bg-primary/90 cursor-pointer shadow-sm">
+            <span class="font-bold text-[13px]">Run ${algoNames[currentAlgo]}</span>
+        </button></div>`;
+        body.innerHTML = configHtml;
+        return;
+    }
+    
     title.className = 'font-headline-sm text-headline-sm text-on-surface';
     title.textContent = '2. ' + algoNames[currentAlgo] + ' Configuration';
     
@@ -683,13 +764,16 @@ function removeIcons(text) {
 function formatLocalSearchLog(logData) {
     let html = '';
     logData.forEach(entry => {
-        html += `<div class="mb-2 pb-2" style="border-bottom: 1px solid rgba(0,0,0,0.06);">`;
-        html += `<div class="flex items-center gap-2 mb-1"><span class="px-1.5 py-0.5 bg-primary/10 text-primary rounded font-bold text-[10px]">Bước ${removeIcons(entry.step)}</span>`;
-        if(entry.frontier_str) html += `<span class="text-[10px] text-secondary">${removeIcons(entry.frontier_str)}</span>`;
+        html += `<div class="mb-2">`;
+        html += `<p class="mb-1 font-semibold" style="font-size:12px;">Bước ${removeIcons(entry.step)}: ${removeIcons(entry.action_html)}</p>`;
+        if (entry.frontier_str) {
+            html += `
+            <div class="bg-surface-container-low p-1.5 rounded border border-outline-variant/30 inline-block font-mono">
+                <pre class="leading-tight text-[11px] font-bold text-on-surface">${removeIcons(entry.frontier_str)}</pre>
+            </div>`;
+        }
         html += `</div>`;
-        html += `<div class="text-[11px] leading-relaxed">${removeIcons(entry.action_html)}</div>`;
-        if(entry.reached_str) html += `<div class="text-[10px] text-outline mt-0.5">${removeIcons(entry.reached_str)}</div>`;
-        html += `</div>`;
+        html += `<div class="border-t border-outline-variant/20 pt-1 opacity-50 mt-1 mb-1"></div>`;
     });
     return html;
 }
@@ -732,7 +816,7 @@ async function callSolve(mode) {
             result.path.forEach((step, idx) => { logHtml += formatLogState(idx+1, step[1], step[0]); });
         }
         document.getElementById('execution-log').innerHTML = logHtml;
-        animatePath(start_state, result.path);
+        animatePath(start_state, result.path, result.start_dual);
     } else {
         let failHtml = '<div class="text-red-600 font-bold" style="font-size:12px;">Không tìm thấy giải pháp!</div>';
         if (result.log_data && result.log_data.length > 0) {
@@ -762,7 +846,7 @@ window.addEventListener('pywebviewready', function() {
 class Api:
     def solve(self, start_state, mode, algorithm='bfs', depth_limit=50, heuristic='misplaced', beam_k=3):
         start_time = time.time()
-        if algorithm in ['simple_hc', 'steepest_hc', 'stochastic_hc', 'simulated_annealing', 'random_restart_hc', 'local_beam']:
+        if algorithm in ['simple_hc', 'steepest_hc', 'stochastic_hc', 'simulated_annealing', 'random_restart_hc', 'local_beam', 'and_or', 'sensorless', 'partial_observable']:
             goal_state = [1, 2, 3, 8, 0, 4, 7, 6, 5]
         else:
             goal_state = [1, 2, 3, 4, 5, 6, 7, 8, 0]
@@ -795,6 +879,12 @@ class Api:
             path, nodes_generated, log_data = result[0], result[1], result[2]
         elif algorithm == 'local_beam':
             path, nodes_generated, log_data = local_beam_search_solve(start_state, goal_state, k=beam_k)
+        elif algorithm == 'and_or':
+            path, nodes_generated, log_data = and_or_graph_search_solve(start_state, goal_state, limit=depth_limit)
+        elif algorithm == 'sensorless':
+            path, nodes_generated, log_data = sensorless_search_solve(start_state, goal_state)
+        elif algorithm == 'partial_observable':
+            path, nodes_generated, log_data = partial_observable_search_solve(start_state, goal_state)
         else:
             path, nodes_generated = bfs(start_state, goal_state, mode)
         
@@ -805,6 +895,10 @@ class Api:
             result = {"success": True, "path": path, "nodes": nodes_generated, "time": elapsed_ms, "depth": len(path)}
         else:
             result = {"success": False, "nodes": nodes_generated, "time": elapsed_ms}
+        
+        if algorithm in ['sensorless', 'partial_observable']:
+            alt = get_one_alternate_state(start_state)
+            result["start_dual"] = [start_state, alt]
         
         if log_data is not None:
             result["log_data"] = log_data
