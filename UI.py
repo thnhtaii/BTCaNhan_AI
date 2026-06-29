@@ -244,7 +244,7 @@ html_content = """<!DOCTYPE html><html class="light" lang="en" style="width: 100
                 </div>
                 <div class="algo-item" data-algo="sensorless" data-category="Complex Environments" onclick="selectAlgo(this)">
                     <span class="material-symbols-outlined check">check</span>
-                    Searching with no observation
+                    Belief State
                 </div>
                 <div class="algo-item" data-algo="partial_observable" data-category="Complex Environments" onclick="selectAlgo(this)">
                     <span class="material-symbols-outlined check">check</span>
@@ -638,7 +638,7 @@ const algoNames = {
     stochastic_hc: 'Stochastic HC', simulated_annealing: 'Simulated Annealing',
     random_restart_hc: 'Random Restart HC', local_beam: 'Local Beam Search',
     and_or: 'AND-OR Graph Search',
-    sensorless: 'Searching with no observation',
+    sensorless: 'Belief State',
     partial_observable: 'Searching for partially observable problems'
 };
 
@@ -758,8 +758,6 @@ function renderConfigUI() {
                         <button onclick="adjustDepth(1)" class="w-7 h-8 flex items-center justify-center bg-surface-container-low hover:bg-surface-container-highest transition-colors cursor-pointer border-l border-outline-variant"><span class="text-primary font-bold text-[14px]">+</span></button>
                     </div>
                 </div>`;
-        } else if (currentAlgo === 'sensorless') {
-            configHtml += `<p class="text-center italic text-secondary mb-2.5 text-[12.5px] leading-tight">Conformant Search (Không quan sát).<br>Tự động tạo 3 trạng thái niềm tin (Belief States) ban đầu.</p>`;
         } else if (currentAlgo === 'partial_observable') {
             configHtml += `<p class="text-center italic text-secondary mb-2.5 text-[12.5px] leading-tight">Quan sát một phần (Partially Observable).<br>Quan sát vị trí ô trống ở mỗi bước đi.</p>`;
         }
