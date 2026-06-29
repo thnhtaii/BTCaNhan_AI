@@ -341,41 +341,78 @@ html_content = """<!DOCTYPE html><html class="light" lang="en" style="width: 100
 let animationTimeout;
 const defaultValues = [1,8,3,2,6,4,7,0,5];
 
-function buildInitialGrid(values) {
+function buildInitialGrid(values1, values2 = null) {
     const grid = document.getElementById('initial-grid');
     grid.innerHTML = '';
-    for(let i = 0; i < 9; i++) {
-        const wrapper = document.createElement('div');
-        wrapper.className = 'cell-wrapper';
+    
+    const isDual = currentAlgo === 'sensorless' || currentAlgo === 'partial_observable';
+    
+    if (isDual) {
+        grid.className = "flex gap-4 w-full justify-between mb-3.5";
         
-        const input = document.createElement('input');
-        input.type = 'number';
-        input.id = `cell-${i}`;
-        input.className = 'h-12 w-full text-center bg-surface-container-high rounded-lg font-headline-sm text-[18px] font-bold text-primary border border-primary/20 focus:outline-none focus:ring-2 focus:ring-primary';
-        input.value = values[i];
-        input.min = 0;
-        input.max = 8;
-        input.dataset.prev = values[i];
+        // Render Ma Trận 1
+        const wrapper1 = document.createElement('div');
+        wrapper1.className = 'flex-1';
+        wrapper1.innerHTML = '<div class="text-[11px] font-bold text-secondary mb-1">Ma Trận 1</div>';
+        const subGrid1 = document.createElement('div');
+        subGrid1.className = 'grid grid-cols-3 gap-1.5';
+        for(let i = 0; i < 9; i++) {
+            subGrid1.appendChild(createCellElement(i, values1[i]));
+        }
+        wrapper1.appendChild(subGrid1);
+        grid.appendChild(wrapper1);
         
-        input.addEventListener('change', function() { handleCellChange(i); });
-        
-        const spinBtns = document.createElement('div');
-        spinBtns.className = 'spinner-btns';
-        
-        const btnUp = document.createElement('button');
-        btnUp.innerHTML = '&#9650;';
-        btnUp.addEventListener('click', (e) => { e.preventDefault(); spinCell(i, 1); });
-        
-        const btnDown = document.createElement('button');
-        btnDown.innerHTML = '&#9660;';
-        btnDown.addEventListener('click', (e) => { e.preventDefault(); spinCell(i, -1); });
-        
-        spinBtns.appendChild(btnUp);
-        spinBtns.appendChild(btnDown);
-        wrapper.appendChild(input);
-        wrapper.appendChild(spinBtns);
-        grid.appendChild(wrapper);
+        // Render Ma Trận 2
+        const wrapper2 = document.createElement('div');
+        wrapper2.className = 'flex-1';
+        wrapper2.innerHTML = '<div class="text-[11px] font-bold text-secondary mb-1">Ma Trận 2</div>';
+        const subGrid2 = document.createElement('div');
+        subGrid2.className = 'grid grid-cols-3 gap-1.5';
+        const v2 = values2 || [2,8,3,1,0,4,7,6,5];
+        for(let i = 0; i < 9; i++) {
+            subGrid2.appendChild(createCellElement(i + 9, v2[i]));
+        }
+        wrapper2.appendChild(subGrid2);
+        grid.appendChild(wrapper2);
+    } else {
+        grid.className = "grid grid-cols-3 gap-2 mb-3.5";
+        for(let i = 0; i < 9; i++) {
+            grid.appendChild(createCellElement(i, values1[i]));
+        }
     }
+}
+
+function createCellElement(i, val) {
+    const wrapper = document.createElement('div');
+    wrapper.className = 'cell-wrapper';
+    
+    const input = document.createElement('input');
+    input.type = 'number';
+    input.id = `cell-${i}`;
+    input.className = 'h-11 w-full text-center bg-surface-container-high rounded-lg font-headline-sm text-[16px] font-bold text-primary border border-primary/20 focus:outline-none focus:ring-2 focus:ring-primary';
+    input.value = val;
+    input.min = 0;
+    input.max = 8;
+    input.dataset.prev = val;
+    
+    input.addEventListener('change', function() { handleCellChange(i); });
+    
+    const spinBtns = document.createElement('div');
+    spinBtns.className = 'spinner-btns';
+    
+    const btnUp = document.createElement('button');
+    btnUp.innerHTML = '&#9650;';
+    btnUp.addEventListener('click', (e) => { e.preventDefault(); spinCell(i, 1); });
+    
+    const btnDown = document.createElement('button');
+    btnDown.innerHTML = '&#9660;';
+    btnDown.addEventListener('click', (e) => { e.preventDefault(); spinCell(i, -1); });
+    
+    spinBtns.appendChild(btnUp);
+    spinBtns.appendChild(btnDown);
+    wrapper.appendChild(input);
+    wrapper.appendChild(spinBtns);
+    return wrapper;
 }
 
 function getCellValue(idx) { return parseInt(document.getElementById(`cell-${idx}`).value) || 0; }
@@ -392,7 +429,11 @@ function handleCellChange(changedIdx) {
     if(newVal > 8) newVal = 8;
     el.value = newVal;
     if(newVal === oldVal) { el.dataset.prev = newVal; return; }
-    for(let i = 0; i < 9; i++) {
+    
+    const startIdx = changedIdx < 9 ? 0 : 9;
+    const endIdx = changedIdx < 9 ? 9 : 18;
+    
+    for(let i = startIdx; i < endIdx; i++) {
         if(i === changedIdx) continue;
         if(getCellValue(i) === newVal) { setCellValue(i, oldVal); break; }
     }
@@ -405,7 +446,11 @@ function spinCell(idx, delta) {
     let newVal = oldVal + delta;
     if(newVal < 0) newVal = 8;
     if(newVal > 8) newVal = 0;
-    for(let i = 0; i < 9; i++) {
+    
+    const startIdx = idx < 9 ? 0 : 9;
+    const endIdx = idx < 9 ? 9 : 18;
+    
+    for(let i = startIdx; i < endIdx; i++) {
         if(i === idx) continue;
         if(getCellValue(i) === newVal) { setCellValue(i, oldVal); break; }
     }
@@ -414,9 +459,17 @@ function spinCell(idx, delta) {
 }
 
 function updateBoardPreview() {
-    const state = [];
-    for(let i = 0; i < 9; i++) state.push(getCellValue(i));
-    renderBoard(state);
+    if (currentAlgo === 'sensorless' || currentAlgo === 'partial_observable') {
+        const state1 = [];
+        const state2 = [];
+        for(let i = 0; i < 9; i++) state1.push(getCellValue(i));
+        for(let i = 9; i < 18; i++) state2.push(getCellValue(i));
+        renderBoard([state1, state2]);
+    } else {
+        const state = [];
+        for(let i = 0; i < 9; i++) state.push(getCellValue(i));
+        renderBoard(state);
+    }
 }
 
 function renderBoard(state) {
@@ -476,23 +529,64 @@ function renderGoalGrid(goalState) {
     });
 }
 
+function getSolvableNeighborJS(state) {
+    const pos = state.indexOf(0);
+    const r = Math.floor(pos / 3), c = pos % 3;
+    const neighbors = [];
+    const swap = (s, i, j) => {
+        let n = [...s];
+        [n[i], n[j]] = [n[j], n[i]];
+        return n;
+    };
+    if (c > 0) neighbors.push(swap(state, pos, pos - 1));
+    if (c < 2) neighbors.push(swap(state, pos, pos + 1));
+    if (r > 0) neighbors.push(swap(state, pos, pos - 3));
+    if (r < 2) neighbors.push(swap(state, pos, pos + 3));
+    return neighbors[Math.floor(Math.random() * neighbors.length)];
+}
+
 function randomBoard() {
-    let nums = (localSearchAlgos.includes(currentAlgo) || complexEnvAlgos.includes(currentAlgo)) ? [1, 2, 3, 8, 0, 4, 7, 6, 5] : [1, 2, 3, 4, 5, 6, 7, 8, 0];
-    for(let i=nums.length-1; i>0; i--){
+    const isDual = currentAlgo === 'sensorless' || currentAlgo === 'partial_observable';
+    let nums1 = (localSearchAlgos.includes(currentAlgo) || complexEnvAlgos.includes(currentAlgo)) ? [1, 2, 3, 8, 0, 4, 7, 6, 5] : [1, 2, 3, 4, 5, 6, 7, 8, 0];
+    for(let i=nums1.length-1; i>0; i--){
         const j = Math.floor(Math.random()*(i+1));
-        [nums[i], nums[j]] = [nums[j], nums[i]];
+        [nums1[i], nums1[j]] = [nums1[j], nums1[i]];
     }
-    buildInitialGrid(nums); renderBoard(nums);
+    
+    if (isDual) {
+        let nums2 = getSolvableNeighborJS(nums1);
+        buildInitialGrid(nums1, nums2);
+        renderBoard([nums1, nums2]);
+    } else {
+        buildInitialGrid(nums1);
+        renderBoard(nums1);
+    }
 }
 
 function resetBoard() {
-    const nums = (localSearchAlgos.includes(currentAlgo) || complexEnvAlgos.includes(currentAlgo)) ? [1, 2, 3, 8, 0, 4, 7, 6, 5] : [1, 2, 3, 4, 5, 6, 7, 8, 0];
-    buildInitialGrid(nums); renderBoard(nums);
+    const isDual = currentAlgo === 'sensorless' || currentAlgo === 'partial_observable';
+    const nums1 = (localSearchAlgos.includes(currentAlgo) || complexEnvAlgos.includes(currentAlgo)) ? [1, 2, 3, 8, 0, 4, 7, 6, 5] : [1, 2, 3, 4, 5, 6, 7, 8, 0];
+    if (isDual) {
+        const nums2 = [1, 2, 3, 8, 4, 0, 7, 6, 5];
+        buildInitialGrid(nums1, nums2);
+        renderBoard([nums1, nums2]);
+    } else {
+        buildInitialGrid(nums1);
+        renderBoard(nums1);
+    }
 }
 
 function loadExample() {
-    const nums = (localSearchAlgos.includes(currentAlgo) || complexEnvAlgos.includes(currentAlgo)) ? [2, 8, 3, 1, 6, 4, 7, 0, 5] : [1, 8, 3, 2, 6, 4, 7, 0, 5];
-    buildInitialGrid(nums); renderBoard(nums);
+    const isDual = currentAlgo === 'sensorless' || currentAlgo === 'partial_observable';
+    const nums1 = (localSearchAlgos.includes(currentAlgo) || complexEnvAlgos.includes(currentAlgo)) ? [2, 8, 3, 1, 6, 4, 7, 0, 5] : [1, 8, 3, 2, 6, 4, 7, 0, 5];
+    if (isDual) {
+        const nums2 = [2, 8, 3, 1, 0, 4, 7, 6, 5];
+        buildInitialGrid(nums1, nums2);
+        renderBoard([nums1, nums2]);
+    } else {
+        buildInitialGrid(nums1);
+        renderBoard(nums1);
+    }
 }
 
 function formatLogState(title, state, action=null) {
@@ -787,6 +881,16 @@ async function callSolve(mode) {
         start_state.push(val);
     }
     
+    let start_state_2 = null;
+    if (currentAlgo === 'sensorless' || currentAlgo === 'partial_observable') {
+        start_state_2 = [];
+        for(let i=9; i<18; i++) {
+            let val = parseInt(document.getElementById(`cell-${i}`).value);
+            if(isNaN(val)) val = 0;
+            start_state_2.push(val);
+        }
+    }
+    
     let depthLimit = 50;
     const depthInput = document.getElementById('depth-limit');
     if(depthInput) depthLimit = parseInt(depthInput.value) || 50;
@@ -799,7 +903,7 @@ async function callSolve(mode) {
     const beamInput = document.getElementById('beam-k');
     if(beamInput) beamK = parseInt(beamInput.value) || 3;
     
-    const result = await pywebview.api.solve(start_state, mode, currentAlgo, depthLimit, heuristic, beamK);
+    const result = await pywebview.api.solve(start_state, mode, currentAlgo, depthLimit, heuristic, beamK, start_state_2);
     const modeLabel = mode === 'none' ? '' : ' — ' + mode.toUpperCase() + ' GOAL TEST';
     
     if (result.success) {
@@ -844,7 +948,7 @@ window.addEventListener('pywebviewready', function() {
 </body></html>"""
 
 class Api:
-    def solve(self, start_state, mode, algorithm='bfs', depth_limit=50, heuristic='misplaced', beam_k=3):
+    def solve(self, start_state, mode, algorithm='bfs', depth_limit=50, heuristic='misplaced', beam_k=3, start_state_2=None):
         start_time = time.time()
         if algorithm in ['simple_hc', 'steepest_hc', 'stochastic_hc', 'simulated_annealing', 'random_restart_hc', 'local_beam', 'and_or', 'sensorless', 'partial_observable']:
             goal_state = [1, 2, 3, 8, 0, 4, 7, 6, 5]
@@ -882,9 +986,9 @@ class Api:
         elif algorithm == 'and_or':
             path, nodes_generated, log_data = and_or_graph_search_solve(start_state, goal_state, limit=depth_limit)
         elif algorithm == 'sensorless':
-            path, nodes_generated, log_data = sensorless_search_solve(start_state, goal_state)
+            path, nodes_generated, log_data = sensorless_search_solve(start_state, goal_state, start_state_2)
         elif algorithm == 'partial_observable':
-            path, nodes_generated, log_data = partial_observable_search_solve(start_state, goal_state)
+            path, nodes_generated, log_data = partial_observable_search_solve(start_state, goal_state, start_state_2)
         else:
             path, nodes_generated = bfs(start_state, goal_state, mode)
         
@@ -897,7 +1001,7 @@ class Api:
             result = {"success": False, "nodes": nodes_generated, "time": elapsed_ms}
         
         if algorithm in ['sensorless', 'partial_observable']:
-            alt = get_one_alternate_state(start_state)
+            alt = start_state_2 if start_state_2 is not None else get_one_alternate_state(start_state)
             result["start_dual"] = [start_state, alt]
         
         if log_data is not None:

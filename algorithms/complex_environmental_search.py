@@ -134,8 +134,11 @@ def and_or_graph_search_solve(start_state, goal_state, limit=15):
     return path, nodes_generated, None
 
 # 2. Sensorless Search (Conformant Search)
-def sensorless_search_solve(start_state, goal_state):
-    alt_state = get_one_alternate_state(start_state)
+def sensorless_search_solve(start_state, goal_state, start_state_2=None):
+    if start_state_2 is None:
+        alt_state = get_one_alternate_state(start_state)
+    else:
+        alt_state = start_state_2
     initial_belief = {tuple(start_state), tuple(alt_state)}
     
     frontier = deque([(initial_belief, [], start_state, alt_state)])
@@ -193,8 +196,11 @@ def sensorless_search_solve(start_state, goal_state):
     return found_path, nodes_generated, log_data
 
 # 3. Partially Observable Search
-def partial_observable_search_solve(start_state, goal_state):
-    alt_state = get_one_alternate_state(start_state)
+def partial_observable_search_solve(start_state, goal_state, start_state_2=None):
+    if start_state_2 is None:
+        alt_state = get_one_alternate_state(start_state)
+    else:
+        alt_state = start_state_2
     initial_belief = {tuple(start_state), tuple(alt_state)}
     
     # frontier stores: (current_belief, path, current_actual)
