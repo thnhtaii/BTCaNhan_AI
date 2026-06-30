@@ -65,9 +65,42 @@ DoAnCaNhan/
 
 ---
 
-# 2. Nội dung
+# 2. Hướng dẫn Cài đặt và Khởi chạy
 
-## 2.1. Tìm kiếm không có thông tin (Uninformed Search)
+Dưới đây là hướng dẫn cài đặt các thư viện cần thiết và cách vận hành dự án.
+
+## 2.1. Yêu cầu Hệ thống
+- **Hệ điều hành**: Windows 10/11, macOS, hoặc Linux.
+- **Python**: Phiên bản **Python 3.8** trở lên.
+- **Các thư viện ngoài**:
+  - `pywebview`: Thư viện hiển thị giao diện Desktop (HTML/CSS/JS).
+  - `matplotlib` & `numpy`: Thư viện dùng cho việc đo lường benchmark và vẽ biểu đồ so sánh hiệu năng.
+
+## 2.2. Hướng dẫn Cài đặt
+1. Mở terminal (CMD, PowerShell hoặc Terminal trên Linux/macOS) và di chuyển vào thư mục dự án:
+   ```bash
+   cd DoAnCaNhan
+   ```
+2. Cài đặt các thư viện cần thiết bằng lệnh `pip`:
+   ```bash
+   pip install pywebview matplotlib numpy
+   ```
+
+## 2.3. Hướng dẫn Khởi chạy
+- **Chạy ứng dụng chính (Giao diện đồ họa tương tác)**:
+  ```bash
+  python UI.py
+  ```
+- **Chạy đo lường hiệu năng và cập nhật các biểu đồ so sánh**:
+  ```bash
+  python scratch/benchmark_and_chart.py
+  ```
+
+---
+
+# 3. Nội dung
+
+## 3.1. Tìm kiếm không có thông tin (Uninformed Search)
 
 Tìm kiếm không có thông tin (Tìm kiếm mù) sử dụng các chiến lược duyệt cây/đồ thị mà không có thêm thông tin về mức độ hứa hẹn của các nút ngoại trừ thông tin cấu hình trạng thái hiện tại.
 Các thuật toán triển khai bao gồm:
@@ -104,7 +137,7 @@ Các thuật toán triển khai bao gồm:
 
 ---
 
-## 2.2. Tìm kiếm Có Thông Tin (Informed Search)
+## 3.2. Tìm kiếm Có Thông Tin (Informed Search)
 
 Sử dụng hàm heuristic $h(n)$ để ước lượng khoảng cách từ trạng thái hiện tại đến đích nhằm định hướng tìm kiếm hiệu quả hơn. Hàm heuristic sử dụng là **Khoảng cách Manhattan**.
 Các thuật toán triển khai bao gồm:
@@ -130,7 +163,7 @@ Các thuật toán triển khai bao gồm:
 
 ---
 
-## 2.3. Tìm kiếm Cục Bộ (Local Search)
+## 3.3. Tìm kiếm Cục Bộ (Local Search)
 
 Tập trung vào việc cải tiến trạng thái hiện tại bằng cách đánh giá các nút lân cận mà không cần lưu trữ toàn bộ cây tìm kiếm, giảm độ phức tạp không gian về hằng số $O(1)$.
 Các thuật toán triển khai bao gồm:
@@ -165,7 +198,7 @@ Các thuật toán triển khai bao gồm:
 
 ---
 
-## 2.4. Tìm kiếm Phức Tạp (Complex Environments)
+## 3.4. Tìm kiếm Phức Tạp (Complex Environments)
 
 Giải quyết các bài toán khi môi trường không chắc chắn, không thể quan sát toàn bộ hoặc có cấu trúc phân nhánh đặc biệt.
 Các thuật toán triển khai bao gồm:
@@ -191,7 +224,7 @@ Các thuật toán triển khai bao gồm:
 
 ---
 
-## 2.5. Bài toán Hài Hòa Ràng Buộc (CSPs)
+## 3.5. Bài toán Hài Hòa Ràng Buộc (CSPs)
 
 Biến đổi bài toán tìm kiếm thành việc tìm kiếm bộ giá trị cho các biến số sao cho thỏa mãn các ràng buộc định trước. Đối với 8-puzzle, các ô lưới là các biến, miền giá trị là $\{1..8, trống\}$, và các ràng buộc là tính kề cận của bước chuyển dịch.
 Các thuật toán triển khai bao gồm:
@@ -221,7 +254,7 @@ Các thuật toán triển khai bao gồm:
 
 ---
 
-## 2.6. Tìm kiếm đối kháng (Adversarial Search - Caro 3x3)
+## 3.6. Tìm kiếm đối kháng (Adversarial Search - Caro 3x3)
 
 Áp dụng cho môi trường có sự cạnh tranh trực tiếp giữa hai Agent (Người chơi X và AI O).
 Các thuật toán triển khai bao gồm:
@@ -247,13 +280,13 @@ Các thuật toán triển khai bao gồm:
 
 ---
 
-# 3. Phân tích & So sánh Hiệu suất Chi tiết
+# 4. Phân tích & So sánh Hiệu suất Chi tiết
 
 Dưới đây là các biểu đồ phân tích hiệu năng được đo lường trực tiếp từ hệ thống chạy thực tế trên các cấu hình kiểm thử tiêu chuẩn. Dữ liệu bao gồm hai chỉ số chính: **Thời gian thực thi (ms)** (trục tung bên trái) và **Số lượng nút đã sinh ra/khám phá** (trục tung bên phải).
 
 ---
 
-## 3.1. Nhóm 1: Tìm kiếm mù (Uninformed Search)
+## 5.1. Nhóm 1: Tìm kiếm mù (Uninformed Search)
 
 ![Biểu đồ so sánh nhóm 1](assets/comparison_1_uninformed.png)
 
@@ -265,7 +298,7 @@ Dưới đây là các biểu đồ phân tích hiệu năng được đo lườ
 
 ---
 
-## 3.2. Nhóm 2: Tìm kiếm có thông tin (Informed Search)
+## 5.2. Nhóm 2: Tìm kiếm có thông tin (Informed Search)
 
 ![Biểu đồ so sánh nhóm 2](assets/comparison_2_informed.png)
 
@@ -277,7 +310,7 @@ Dưới đây là các biểu đồ phân tích hiệu năng được đo lườ
 
 ---
 
-## 3.3. Nhóm 3: Tìm kiếm cục bộ (Local Search)
+## 5.3. Nhóm 3: Tìm kiếm cục bộ (Local Search)
 
 ![Biểu đồ so sánh nhóm 3](assets/comparison_3_local_search.png)
 
@@ -289,7 +322,7 @@ Dưới đây là các biểu đồ phân tích hiệu năng được đo lườ
 
 ---
 
-## 3.4. Nhóm 4: Tìm kiếm môi trường phức tạp (Complex Environments)
+## 4.4. Nhóm 4: Tìm kiếm môi trường phức tạp (Complex Environments)
 
 ![Biểu đồ so sánh nhóm 4](assets/comparison_4_complex_env.png)
 
@@ -302,7 +335,7 @@ Dưới đây là các biểu đồ phân tích hiệu năng được đo lườ
 
 ---
 
-## 3.5. Nhóm 5: Bài toán thỏa mãn ràng buộc (CSP)
+## 4.5. Nhóm 5: Bài toán thỏa mãn ràng buộc (CSP)
 
 ![Biểu đồ so sánh nhóm 5](assets/comparison_5_csp.png)
 
@@ -315,7 +348,7 @@ Dưới đây là các biểu đồ phân tích hiệu năng được đo lườ
 
 ---
 
-## 3.6. Nhóm 6: Tìm kiếm đối kháng (Adversarial Search)
+## 4.6. Nhóm 6: Tìm kiếm đối kháng (Adversarial Search)
 
 ![Biểu đồ so sánh nhóm 6](assets/comparison_6_adversarial.png)
 
@@ -326,7 +359,7 @@ Dưới đây là các biểu đồ phân tích hiệu năng được đo lườ
 
 ---
 
-## 3.7. So sánh hiệu suất tổng thể giữa 6 nhóm
+## 4.7. So sánh hiệu suất tổng thể giữa 6 nhóm
 
 ![Biểu đồ so sánh tổng thể](assets/comparison_overall.png)
 
@@ -338,17 +371,17 @@ Dưới đây là các biểu đồ phân tích hiệu năng được đo lườ
 
 ---
 
-# 4. Kết luận
+# 5. Kết luận
 
-## 4.1. Kết quả đạt được
+## 5.1. Kết quả đạt được
 
 Dự án đã xây dựng thành công một chương trình toàn diện mô phỏng 22 thuật toán tìm kiếm trên lưới 8-puzzle và bàn cờ Caro 3x3. Hệ thống hoạt động chính xác, ổn định và có giao diện đồ họa trực quan cao. Người dùng có thể dễ dàng so sánh hiệu năng trực quan giữa các thuật toán dựa trên các số liệu thực tế được đo lường chính xác từ hệ thống.
 
-## 4.2. Khó khăn
+## 5.2. Khó khăn
 
 Việc tối ưu hóa hiệu năng hiển thị và tránh tràn bộ nhớ đối với các thuật toán tìm kiếm mù có độ sâu lớn đòi hỏi việc quản lý bộ nhớ chặt chẽ. Ngoài ra, việc thiết kế các thuật toán thuộc nhóm CSP và môi trường quan sát một phần để ánh xạ tương thích vào bài toán 8-puzzle đòi hỏi các kỹ thuật chuyển đổi mô hình phức tạp.
 
-## 4.3. Hướng phát triển
+## 5.3. Hướng phát triển
 
 - Tích hợp thêm các thuật toán Học máy và Học tăng cường sâu (Deep Reinforcement Learning - DQN) để giải quyết các cấu hình 8-puzzle có độ sâu cực lớn.
 - Mở rộng hệ thống để hỗ trợ các bài toán lớn hơn như 15-puzzle hoặc bàn cờ Caro kích thước $5\times 5$, $10\times 10$.
