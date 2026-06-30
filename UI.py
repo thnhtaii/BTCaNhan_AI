@@ -20,6 +20,12 @@ from algorithms.complex_environmental_search import (
     partial_observable_search_solve,
     get_one_alternate_state
 )
+from algorithms.csp_search import (
+    ac3_search,
+    backtracking_search,
+    forward_tracking_search,
+    min_conflicts_search
+)
 
 html_content = """<!DOCTYPE html><html class="light" lang="en" style="width: 100%; height: 100%; overflow: hidden;"><head>
 <meta charset="utf-8">
@@ -249,6 +255,23 @@ html_content = """<!DOCTYPE html><html class="light" lang="en" style="width: 100
                 <div class="algo-item" data-algo="partial_observable" data-category="Complex Environments" onclick="selectAlgo(this)">
                     <span class="material-symbols-outlined check">check</span>
                     Belief State & Goal
+                </div>
+                <div class="algo-group-label" style="border-top:1px solid #e1e8fd; margin-top:4px; padding-top:10px;">CSP</div>
+                <div class="algo-item" data-algo="ac3" data-category="CSP" onclick="selectAlgo(this)">
+                    <span class="material-symbols-outlined check">check</span>
+                    AC-3
+                </div>
+                <div class="algo-item" data-algo="backtracking" data-category="CSP" onclick="selectAlgo(this)">
+                    <span class="material-symbols-outlined check">check</span>
+                    Backtracking
+                </div>
+                <div class="algo-item" data-algo="forward_tracking" data-category="CSP" onclick="selectAlgo(this)">
+                    <span class="material-symbols-outlined check">check</span>
+                    Forward Tracking
+                </div>
+                <div class="algo-item" data-algo="min_conflicts" data-category="CSP" onclick="selectAlgo(this)">
+                    <span class="material-symbols-outlined check">check</span>
+                    Min-Conflicts
                 </div>
             </div>
         </div>
@@ -642,8 +665,16 @@ function formatLogState(title, state, action=null) {
         let row = state.slice(i, i+3).map(x => (x===0 || x==='0') ? "[ ]" : ("  "+x+"  ")).join("");
         stateStr += " " + row + "\\n";
     }
-    let titleHtml = action ? `<p class="mb-1 font-semibold" style="font-size:12px;">Bước ${title}: Di chuyển ô trống sang <span class="text-primary">${action}</span></p>` 
-                           : `<p class="mb-1 font-semibold" style="font-size:12px;">${title}</p>`;
+    let titleHtml;
+    if (action) {
+        if (action.includes("Gán") || action.includes("gan") || action.includes("Assign")) {
+            titleHtml = `<p class="mb-1 font-semibold" style="font-size:12px;">Bước ${title}: <span class="text-primary">${action}</span></p>`;
+        } else {
+            titleHtml = `<p class="mb-1 font-semibold" style="font-size:12px;">Bước ${title}: Di chuyển ô trống sang <span class="text-primary">${action}</span></p>`;
+        }
+    } else {
+        titleHtml = `<p class="mb-1 font-semibold" style="font-size:12px;">${title}</p>`;
+    }
                            
     return `
     <div class="mb-2">
@@ -686,13 +717,18 @@ const algoNames = {
     random_restart_hc: 'Random Restart HC', local_beam: 'Local Beam Search',
     and_or: 'AND-OR Graph Search',
     sensorless: 'Belief State',
-    partial_observable: 'Belief State & Goal'
+    partial_observable: 'Belief State & Goal',
+    ac3: 'AC-3',
+    backtracking: 'Backtracking',
+    forward_tracking: 'Forward Tracking',
+    min_conflicts: 'Min-Conflicts'
 };
 
 const hasEarlyLate = ['bfs', 'dfs'];
 const hasDepthLimit = ['ids'];
 const localSearchAlgos = ['simple_hc', 'steepest_hc', 'stochastic_hc', 'simulated_annealing', 'random_restart_hc', 'local_beam'];
 const complexEnvAlgos = ['and_or', 'sensorless', 'partial_observable'];
+const cspAlgos = ['ac3', 'backtracking', 'forward_tracking', 'min_conflicts'];
 
 function toggleDropdown() {
     const menu = document.getElementById('algo-menu');
@@ -827,11 +863,12 @@ function renderConfigUI() {
                     <span class="font-bold text-on-surface-variant text-[13px]">Late Goal Test</span>
                 </button>
             </div>`;
-    } else if (hasDepthLimit.includes(currentAlgo)) {
+    } else if (hasDepthLimit.includes(currentAlgo) || cspAlgos.includes(currentAlgo)) {
+        const limitLabel = cspAlgos.includes(currentAlgo) ? "Limit" : "Depth Limit";
         body.innerHTML = `
             <div class="flex flex-col gap-2 items-center justify-center w-full mt-1">
                 <div class="flex items-center gap-3">
-                    <span class="font-label-md text-[12px] text-on-surface-variant font-semibold">Depth Limit:</span>
+                    <span class="font-label-md text-[12px] text-on-surface-variant font-semibold">${limitLabel}:</span>
                     <div class="flex items-center border border-outline-variant rounded-lg overflow-hidden">
                         <button onclick="adjustDepth(-1)" class="w-7 h-8 flex items-center justify-center bg-surface-container-low hover:bg-surface-container-highest transition-colors cursor-pointer border-r border-outline-variant">
                             <span class="text-primary font-bold text-[14px]">−</span>
@@ -843,7 +880,7 @@ function renderConfigUI() {
                     </div>
                 </div>
                 <button onclick="callSolve('none')" class="w-full h-9 bg-primary text-white rounded-full flex items-center justify-center transition-all hover:bg-primary/90 cursor-pointer shadow-sm">
-                    <span class="font-bold text-[13px]">Run Ready IDS</span>
+                    <span class="font-bold text-[13px]">Run ${algoNames[currentAlgo]}</span>
                 </button>
             </div>`;
     } else {
@@ -1032,6 +1069,14 @@ class Api:
             path, nodes_generated, log_data = sensorless_search_solve(start_state, goal_state, start_state_2)
         elif algorithm == 'partial_observable':
             path, nodes_generated, log_data = partial_observable_search_solve(start_state, goal_state, start_state_2)
+        elif algorithm == 'ac3':
+            path, nodes_generated = ac3_search(start_state, goal_state, depth_limit)
+        elif algorithm == 'backtracking':
+            path, nodes_generated = backtracking_search(start_state, goal_state, depth_limit)
+        elif algorithm == 'forward_tracking':
+            path, nodes_generated = forward_tracking_search(start_state, goal_state, depth_limit)
+        elif algorithm == 'min_conflicts':
+            path, nodes_generated = min_conflicts_search(start_state, goal_state, depth_limit)
         else:
             path, nodes_generated = bfs(start_state, goal_state, mode)
         
