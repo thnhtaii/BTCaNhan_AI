@@ -80,6 +80,7 @@ def ac3_search(start_state, goal_state, limit):
 
 def backtracking_search(start_state, goal_state, limit):
     nodes_generated = 1
+    visited = {tuple(start_state)}
     
     def backtrack(state, path, depth):
         nonlocal nodes_generated
@@ -89,20 +90,14 @@ def backtracking_search(start_state, goal_state, limit):
             return None
             
         for action, child in get_successors(state):
-            # Check loop
-            in_path = False
-            for prev_action, prev_state in path:
-                if child == prev_state:
-                    in_path = True
-                    break
-            if child == start_state:
-                in_path = True
-                
-            if not in_path:
+            child_t = tuple(child)
+            if child_t not in visited:
+                visited.add(child_t)
                 nodes_generated += 1
                 result = backtrack(child, path + [(action, child)], depth + 1)
                 if result is not None:
                     return result
+                visited.remove(child_t)
         return None
 
     path = backtrack(start_state, [], 0)
@@ -110,6 +105,7 @@ def backtracking_search(start_state, goal_state, limit):
 
 def forward_tracking_search(start_state, goal_state, limit):
     nodes_generated = 1
+    visited = {tuple(start_state)}
     
     def backtrack_fc(state, path, depth):
         nonlocal nodes_generated
@@ -119,18 +115,8 @@ def forward_tracking_search(start_state, goal_state, limit):
             return None
             
         for action, child in get_successors(state):
-            # Check loop
-            in_path = False
-            for prev_action, prev_state in path:
-                if child == prev_state:
-                    in_path = True
-                    break
-            if child == start_state:
-                in_path = True
-                
-            if not in_path:
-                nodes_generated += 1
-                
+            child_t = tuple(child)
+            if child_t not in visited:
                 # Early goal test
                 if child == goal_state:
                     return path + [(action, child)]
@@ -138,25 +124,20 @@ def forward_tracking_search(start_state, goal_state, limit):
                 # Look ahead (Forward check)
                 child_successors = get_successors(child)
                 has_valid_successor = False
-                for next_action, next_child in child_successors:
-                    next_in_path = False
-                    for p_action, p_state in path + [(action, child)]:
-                        if next_child == p_state:
-                            next_in_path = True
-                            break
-                    if next_child == start_state:
-                        next_in_path = True
-                    
-                    if not next_in_path:
+                for _, next_child in child_successors:
+                    if tuple(next_child) not in visited:
                         has_valid_successor = True
                         break
                 
                 if not has_valid_successor:
                     continue
                 
+                visited.add(child_t)
+                nodes_generated += 1
                 result = backtrack_fc(child, path + [(action, child)], depth + 1)
                 if result is not None:
                     return result
+                visited.remove(child_t)
         return None
 
     path = backtrack_fc(start_state, [], 0)

@@ -577,7 +577,7 @@ function renderBoard(state) {
         state.forEach((s, boardIdx) => {
             let label = boardIdx === 0 ? "Mô hình 1" : "Mô hình 2";
             if (currentAlgo === 'partial_observable') {
-                label = boardIdx === 0 ? "Thực tế" : "Niềm tin";
+                label = boardIdx === 0 ? "Belief" : "Belief";
             }
             let boardHtml = `<div class="flex flex-col items-center gap-1">
                 <span class="text-[9px] font-bold text-secondary uppercase">${label}</span>
