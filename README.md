@@ -138,15 +138,92 @@ Các thuật toán triển khai bao gồm:
 
 ---
 
-# 3. Kết luận
+# 3. Phân tích & So sánh Hiệu suất Chi tiết
 
-## 3.1. Kết quả đạt được
+Dưới đây là các biểu đồ phân tích hiệu năng được đo lường trực tiếp từ hệ thống chạy thực tế trên các cấu hình kiểm thử tiêu chuẩn. Dữ liệu bao gồm hai chỉ số chính: **Thời gian thực thi (ms)** (trục tung bên trái) và **Số lượng nút đã sinh ra/khám phá** (trục tung bên phải).
+
+---
+
+## 3.1. Nhóm 1: Tìm kiếm mù (Uninformed Search)
+![Biểu đồ so sánh nhóm 1](assets/comparison_1_uninformed.png)
+
+### Nhận xét:
+- **Tối ưu độ sâu**: `BFS`, `UCS` và `IDS` đều tìm thấy giải pháp tối ưu với **19 bước đi**. Trong khi đó, `DFS` tìm đường đi dài tới **49 bước** do đặc tính đi sâu vào một nhánh mà không quay lui trừ khi gặp giới hạn.
+- **Số nút duyệt**: `IDS` sinh ra nhiều nút nhất (**216,043 nút**, ~155 ms) do cơ chế liên tục duyệt lại các tầng trước đó với giới hạn độ sâu tăng dần.
+- **Thời gian chạy**: `DFS` duyệt nhanh nhất (**16 ms**) nhưng kết quả không tối ưu. `UCS` mất **76 ms** để duyệt 53,036 nút do phải quản lý hàng đợi ưu tiên theo chi phí g(n).
+
+---
+
+## 3.2. Nhóm 2: Tìm kiếm có thông tin (Informed Search)
+![Biểu đồ so sánh nhóm 2](assets/comparison_2_informed.png)
+
+### Nhận xét:
+- **Hiệu quả vượt trội**: Nhờ hàm Heuristic (Manhattan Distance), số lượng nút sinh ra của nhóm này giảm xuống mức tối thiểu (chỉ từ 500 đến 1,500 nút), giúp thời gian chạy giảm xuống chỉ còn **dưới 5 ms**.
+- **So sánh A\* và IDA\***: Cả hai đều cho kết quả tối ưu 19 bước. `IDA*` duyệt **1,281 nút** (~4 ms), ít hơn so với `A*` (**1,421 nút**, ~5 ms) nhờ cơ chế giới hạn ngưỡng $f(n)$ lặp lại giúp loại bỏ các trạng thái không triển vọng.
+- **Greedy BFS**: Duyệt ít nút nhất (**587 nút**, ~2 ms) vì chỉ quan tâm đến giá trị ước lượng $h(n)$ tốt nhất để đi nhanh tới đích. Tuy nhiên, giải pháp của nó không tối ưu (**37 bước**).
+
+---
+
+## 3.3. Nhóm 3: Tìm kiếm cục bộ (Local Search)
+![Biểu đồ so sánh nhóm 3](assets/comparison_3_local_search.png)
+
+### Nhận xét:
+- **Tốc độ cực nhanh**: Nhờ cơ chế chỉ duyệt các trạng thái lân cận mà không lưu cây tìm kiếm, thời gian thực thi của cả nhóm chỉ khoảng **1 ms**.
+- **Kẹt cực trị địa phương**: Các thuật toán Hill Climbing cơ bản (`Simple HC`, `Steepest HC`, `Stochastic HC`) dừng lại rất nhanh (chỉ duyệt 8 nút) nhưng thực tế bị kẹt tại cực trị địa phương và không tìm ra lời giải hoàn chỉnh.
+- **Vượt bẫy cực trị**: `Simulated Annealing` vượt bẫy thành công nhưng phải đi vòng ngẫu nhiên rất nhiều bước (**246 bước**, 271 nút). `Random Restart HC` và `Local Beam Search` giải quyết hiệu quả hơn với số bước tối ưu chỉ là **5 bước**.
+
+---
+
+## 3.4. Nhóm 4: Tìm kiếm môi trường phức tạp (Complex Environments)
+![Biểu đồ so sánh nhóm 4](assets/comparison_4_complex_env.png)
+
+### Nhận xét:
+- **AND-OR Graph Search**: Duyệt **3,018 nút** (~3 ms) để tìm ra cây kế hoạch dự phòng tối ưu, đối phó với sự không chắc chắn từ môi trường.
+- **Sensorless vs Partially Observable**: 
+  - `Sensorless Search` (Agent bị mù hoàn toàn) phải dùng các hành động co-ercive ép trạng thái, duyệt **130 nút** (~1 ms).
+  - `Partially Observable Search` (Agent quan sát được vị trí ô trống) nhờ cập nhật trạng thái niềm tin liên tục nên chỉ cần duyệt **63 nút** (~1 ms), giảm một nửa số lượng nút cần khám phá.
+
+---
+
+## 3.5. Nhóm 5: Bài toán thỏa mãn ràng buộc (CSP)
+![Biểu đồ so sánh nhóm 5](assets/comparison_5_csp.png)
+
+### Nhận xét:
+- **AC-3**: Kiểm tra tính nhất quán của các cung ràng buộc và rút gọn miền giá trị cực nhanh, chỉ cần duyệt **9 nút** (~1 ms).
+- **Backtracking vs Forward Tracking**: Cả hai đều duyệt số nút khổng lồ (~1.08 triệu nút) do việc chuyển dịch 8-puzzle dưới dạng các ràng buộc sinh ra cây DFS rất sâu. 
+  - `Forward Tracking` lọc sớm các giá trị không khả thi nên duyệt ít nút hơn một chút (**1,085,438 nút** so với **1,086,230 nút** của Backtracking), nhưng thời gian chạy lâu hơn (**1924 ms** so với **985 ms**) do chi phí kiểm tra nhìn trước (look-ahead) trên mỗi bước duyệt.
+- **Min-Conflicts**: Duyệt **41,352 nút** (~1583 ms) để sửa chữa lỗi xung đột cục bộ.
+
+---
+
+## 3.6. Nhóm 6: Tìm kiếm đối kháng (Adversarial Search)
+![Biểu đồ so sánh nhóm 6](assets/comparison_6_adversarial.png)
+
+### Nhận xét:
+- **Tối ưu hóa cắt tỉa**: Trên bàn cờ Caro 3x3 mẫu, `Minimax` và `Expectimax` bắt buộc phải duyệt toàn bộ cây trò chơi với **1,018 nút**.
+- `Alpha-Beta Pruning` nhờ cắt tỉa các nhánh con chắc chắn không được chọn, chỉ cần duyệt **81 nút** (tiết kiệm đến **92.04%** tài nguyên tính toán) mà vẫn đảm bảo chọn ra nước đi tối ưu tương đương Minimax.
+
+---
+
+## 3.7. So sánh hiệu suất tổng thể giữa 6 nhóm
+![Biểu đồ so sánh tổng thể](assets/comparison_overall.png)
+
+### Nhận xét:
+- **Nhóm CSP và Tìm kiếm mù**: Có số lượng nút duyệt trung bình lớn nhất (đều sử dụng cơ chế DFS hoặc lặp lại độ sâu lớn để tìm kiếm trên không gian trạng thái rộng).
+- **Nhóm Tìm kiếm có thông tin và cục bộ**: Thể hiện hiệu quả tối ưu nhất với số lượng nút sinh ra cực ít và thời gian xử lý nhanh vượt trội.
+- **Nhóm Tìm kiếm đối kháng (Caro 3x3)**: Có thời gian xử lý trung bình rất thấp nhờ bàn cờ nhỏ (3x3) kết hợp với thuật toán Alpha-Beta cắt tỉa hiệu quả.
+
+---
+
+# 4. Kết luận
+
+## 4.1. Kết quả đạt được
 Dự án đã xây dựng thành công một chương trình toàn diện mô phỏng 22 thuật toán tìm kiếm trên lưới 8-puzzle và bàn cờ Caro 3x3. Hệ thống hoạt động chính xác, ổn định và có giao diện đồ họa trực quan cao. Người dùng có thể dễ dàng so sánh hiệu năng trực quan giữa các thuật toán dựa trên các số liệu thực tế được đo lường chính xác từ hệ thống.
 
-## 3.2. Khó khăn
+## 4.2. Khó khăn
 Việc tối ưu hóa hiệu năng hiển thị và tránh tràn bộ nhớ đối với các thuật toán tìm kiếm mù có độ sâu lớn đòi hỏi việc quản lý bộ nhớ chặt chẽ. Ngoài ra, việc thiết kế các thuật toán thuộc nhóm CSP và môi trường quan sát một phần để ánh xạ tương thích vào bài toán 8-puzzle đòi hỏi các kỹ thuật chuyển đổi mô hình phức tạp.
 
-## 3.3. Hướng phát triển
+## 4.3. Hướng phát triển
 - Tích hợp thêm các thuật toán Học máy và Học tăng cường sâu (Deep Reinforcement Learning - DQN) để giải quyết các cấu hình 8-puzzle có độ sâu cực lớn.
 - Mở rộng hệ thống để hỗ trợ các bài toán lớn hơn như 15-puzzle hoặc bàn cờ Caro kích thước $5\times 5$, $10\times 10$.
 - Bổ sung biểu đồ trực quan hóa dữ liệu so sánh trực tiếp hiệu năng giữa nhiều thuật toán ngay trên giao diện người dùng.

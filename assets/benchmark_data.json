@@ -1,0 +1,175 @@
+{
+    "1_uninformed": [
+        {
+            "algo": "bfs",
+            "name": "BFS",
+            "nodes": 59484,
+            "time_ms": 51,
+            "depth": 19
+        },
+        {
+            "algo": "dfs",
+            "name": "DFS",
+            "nodes": 25717,
+            "time_ms": 16,
+            "depth": 49
+        },
+        {
+            "algo": "ids",
+            "name": "IDS",
+            "nodes": 216043,
+            "time_ms": 155,
+            "depth": 19
+        },
+        {
+            "algo": "ucs",
+            "name": "UCS",
+            "nodes": 53036,
+            "time_ms": 76,
+            "depth": 19
+        }
+    ],
+    "2_informed": [
+        {
+            "algo": "astar",
+            "name": "A*",
+            "nodes": 1421,
+            "time_ms": 5,
+            "depth": 19
+        },
+        {
+            "algo": "greedy",
+            "name": "Greedy BFS",
+            "nodes": 587,
+            "time_ms": 2,
+            "depth": 37
+        },
+        {
+            "algo": "ida_star",
+            "name": "IDA*",
+            "nodes": 1281,
+            "time_ms": 4,
+            "depth": 19
+        }
+    ],
+    "3_local_search": [
+        {
+            "algo": "simple_hc",
+            "name": "Simple HC",
+            "nodes": 8,
+            "time_ms": 1,
+            "depth": 1
+        },
+        {
+            "algo": "steepest_hc",
+            "name": "Steepest HC",
+            "nodes": 8,
+            "time_ms": 1,
+            "depth": 1
+        },
+        {
+            "algo": "stochastic_hc",
+            "name": "Stochastic HC",
+            "nodes": 8,
+            "time_ms": 1,
+            "depth": 1
+        },
+        {
+            "algo": "simulated_annealing",
+            "name": "Simulated Annealing",
+            "nodes": 271,
+            "time_ms": 1,
+            "depth": 246
+        },
+        {
+            "algo": "random_restart_hc",
+            "name": "Random Restart HC",
+            "nodes": 16,
+            "time_ms": 1,
+            "depth": 5
+        },
+        {
+            "algo": "local_beam",
+            "name": "Local Beam Search",
+            "nodes": 24,
+            "time_ms": 1,
+            "depth": 5
+        }
+    ],
+    "4_complex_env": [
+        {
+            "algo": "and_or",
+            "name": "AND-OR Graph",
+            "nodes": 3018,
+            "time_ms": 3,
+            "depth": 15
+        },
+        {
+            "algo": "sensorless",
+            "name": "Sensorless (Belief State)",
+            "nodes": 130,
+            "time_ms": 1,
+            "depth": 5
+        },
+        {
+            "algo": "partial_observable",
+            "name": "Partially Observable",
+            "nodes": 63,
+            "time_ms": 1,
+            "depth": 5
+        }
+    ],
+    "5_csp": [
+        {
+            "algo": "ac3",
+            "name": "AC-3",
+            "nodes": 9,
+            "time_ms": 1,
+            "depth": 8
+        },
+        {
+            "algo": "backtracking",
+            "name": "Backtracking",
+            "nodes": 1086230,
+            "time_ms": 985,
+            "depth": 49
+        },
+        {
+            "algo": "forward_tracking",
+            "name": "Forward Tracking",
+            "nodes": 1085438,
+            "time_ms": 1924,
+            "depth": 49
+        },
+        {
+            "algo": "min_conflicts",
+            "name": "Min-Conflicts",
+            "nodes": 41352,
+            "time_ms": 1583,
+            "depth": 0
+        }
+    ],
+    "6_adversarial": [
+        {
+            "algo": "minimax",
+            "name": "Minimax (Caro)",
+            "nodes": 1018,
+            "time_ms": 1,
+            "depth": 0
+        },
+        {
+            "algo": "alpha_beta",
+            "name": "Alpha-Beta (Caro)",
+            "nodes": 81,
+            "time_ms": 1,
+            "depth": 0
+        },
+        {
+            "algo": "expectimax",
+            "name": "Expectimax (Caro)",
+            "nodes": 1018,
+            "time_ms": 1,
+            "depth": 0
+        }
+    ]
+}
