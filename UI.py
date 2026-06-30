@@ -295,8 +295,8 @@ html_content = """<!DOCTYPE html><html class="light" lang="en" style="width: 100
 <main class="flex-1 w-full p-4 overflow-hidden flex items-center justify-center">
 <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 w-full max-w-[1180px] mx-auto items-start">
     
-    <div class="lg:col-span-7 flex flex-col gap-4">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div id="left-parent" class="lg:col-span-7 flex flex-col gap-4">
+        <div id="grids-container" class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <section class="bg-surface-container-lowest border border-outline-variant rounded-xl p-4 shadow-sm">
                 <div class="flex items-center justify-between mb-2.5 border-b border-outline-variant pb-2">
                     <h3 id="initial-state-title" class="font-headline-sm text-headline-sm text-on-surface">1. Initial State</h3>
@@ -319,7 +319,7 @@ html_content = """<!DOCTYPE html><html class="light" lang="en" style="width: 100
             </section>
         </div>
         
-        <section class="bg-surface-container-lowest border border-outline-variant rounded-xl p-4 shadow-sm flex flex-col items-center">
+        <section id="visual-section" class="bg-surface-container-lowest border border-outline-variant rounded-xl p-4 shadow-sm flex flex-col items-center">
             <div class="flex items-center justify-between border-b border-outline-variant pb-2 mb-2 w-full">
                 <h3 class="font-headline-sm text-headline-sm text-on-surface">3. Visual Simulation</h3>
                 <div id="step-wrapper">
@@ -388,10 +388,16 @@ function buildInitialGrid(values1, values2 = null) {
     
     const titleEl = document.getElementById('initial-state-title');
     const goalSection = document.getElementById('goal-section');
+    const gridsContainer = document.getElementById('grids-container');
+    const leftParent = document.getElementById('left-parent');
+    const visualSection = document.getElementById('visual-section');
     
     if (adversarialAlgos.includes(currentAlgo)) {
         if (titleEl) titleEl.textContent = "1. Bàn cờ Caro (3x3)";
         if (goalSection) goalSection.style.display = 'none';
+        if (gridsContainer && visualSection && visualSection.parentNode !== gridsContainer) {
+            gridsContainer.appendChild(visualSection);
+        }
         
         grid.className = "grid grid-cols-3 gap-2 mb-3.5";
         for (let i = 0; i < 9; i++) {
@@ -417,6 +423,9 @@ function buildInitialGrid(values1, values2 = null) {
     
     if (titleEl) titleEl.textContent = "1. Initial State";
     if (goalSection) goalSection.style.display = 'block';
+    if (leftParent && visualSection && visualSection.parentNode !== leftParent) {
+        leftParent.appendChild(visualSection);
+    }
     
     const isDual = currentAlgo === 'sensorless' || currentAlgo === 'partial_observable';
     
