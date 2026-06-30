@@ -1110,11 +1110,11 @@ async function makeCaroPlayerMove(idx) {
         if (caroGameOver) {
             let winMsg = "";
             if (result.winner === 1) {
-                winMsg = `<div class="mt-2 p-2 bg-blue-100 text-blue-800 rounded font-bold text-center text-[13px]">🎉 Người chơi (X) THẮNG! 🎉</div>`;
+                winMsg = `<div class="mt-2 p-2 bg-blue-100 text-blue-800 rounded font-bold text-center text-[13px]">Người chơi (X) THẮNG!</div>`;
             } else if (result.winner === 2) {
-                winMsg = `<div class="mt-2 p-2 bg-red-100 text-red-800 rounded font-bold text-center text-[13px]">🤖 AI (O) THẮNG! 🤖</div>`;
+                winMsg = `<div class="mt-2 p-2 bg-red-100 text-red-800 rounded font-bold text-center text-[13px]">AI (O) THẮNG!</div>`;
             } else {
-                winMsg = `<div class="mt-2 p-2 bg-slate-100 text-slate-800 rounded font-bold text-center text-[13px]">🤝 Trận đấu HÒA! 🤝</div>`;
+                winMsg = `<div class="mt-2 p-2 bg-slate-100 text-slate-800 rounded font-bold text-center text-[13px]">Trận đấu HÒA!</div>`;
             }
             logEl.innerHTML += winMsg;
         } else {
