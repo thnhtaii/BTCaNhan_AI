@@ -52,9 +52,30 @@ Dự án này áp dụng các thuật toán tìm kiếm và tối ưu trong trí
 Tìm kiếm không có thông tin (Tìm kiếm mù) sử dụng các chiến lược duyệt cây/đồ thị mà không có thêm thông tin về mức độ hứa hẹn của các nút ngoại trừ thông tin cấu hình trạng thái hiện tại.
 Các thuật toán triển khai bao gồm:
 - **BFS (Breadth-First Search)**: Khám phá tất cả các nút ở một mức độ sâu trước khi chuyển sang mức tiếp theo. Đảm bảo tìm ra đường đi ngắn nhất (tối ưu số bước).
+  
+  ![BFS Early Goal](assets/GIF/BFS_early.gif)
+  *Hoạt ảnh BFS - Early Goal Test*
+  
+  ![BFS Late Goal](assets/GIF/BFS_late.gif)
+  *Hoạt ảnh BFS - Late Goal Test*
+
 - **DFS (Depth-First Search)**: Duyệt sâu tối đa vào một nhánh trước khi quay lui. Sử dụng giới hạn độ sâu tối đa để tránh lặp vô tận.
+  
+  ![DFS Early](assets/GIF/DFS_early-ezgif.com-video-to-gif-converter.gif)
+  *Hoạt ảnh DFS - Early Goal Test*
+  
+  ![DFS Late](assets/GIF/DFS_late-ezgif.com-video-to-gif-converter.gif)
+  *Hoạt ảnh DFS - Late Goal Test*
+
 - **UCS (Uniform Cost Search)**: Mở rộng nút có chi phí tích lũy nhỏ nhất. Với 8-puzzle, chi phí mỗi bước đi bằng giá trị của ô số được di chuyển.
+  
+  ![UCS](assets/GIF/UCS-ezgif.com-video-to-gif-converter.gif)
+  *Hoạt ảnh UCS*
+
 - **IDS (Iterative Deepening Search)**: Lặp lại DFS với giới hạn độ sâu tăng dần từ 0, kết hợp tính tối ưu của BFS và tính tiết kiệm bộ nhớ của DFS.
+  
+  ![IDS](assets/GIF/IDS-ezgif.com-video-to-gif-converter.gif)
+  *Hoạt ảnh IDS*
 
 ### Nhận xét
 - `BFS`: Luôn đảm bảo tìm thấy giải pháp tối ưu số bước đi, phù hợp cho các cấu hình bắt đầu gần đích. Tuy nhiên, lượng bộ nhớ tiêu thụ tăng theo hàm mũ và dễ bị tràn bộ nhớ nếu độ sâu đích lớn.
@@ -68,8 +89,19 @@ Các thuật toán triển khai bao gồm:
 Sử dụng hàm heuristic $h(n)$ để ước lượng khoảng cách từ trạng thái hiện tại đến đích nhằm định hướng tìm kiếm hiệu quả hơn. Hàm heuristic sử dụng là **Khoảng cách Manhattan**.
 Các thuật toán triển khai bao gồm:
 - **A\* (A Star Search)**: Sử dụng hàm đánh giá $f(n) = g(n) + h(n)$ để quyết định mở rộng nút. Đảm bảo tìm thấy lời giải tối ưu nếu hàm heuristic là admissible.
+  
+  ![A*](assets/GIF/A_star-ezgif.com-video-to-gif-converter.gif)
+  *Hoạt ảnh A**
+
 - **Greedy Best-First Search**: Chỉ sử dụng hàm heuristic $h(n)$ để quyết định. Ưu tiên đi nhanh nhất đến đích theo ước lượng cảm tính mà bỏ qua chi phí thực tế đã đi.
+  
+  ![Greedy BFS](assets/GIF/Greedy-ezgif.com-video-to-gif-converter.gif)
+  *Hoạt ảnh Greedy Best-First Search*
+
 - **IDA\* (Iterative Deepening A\*)**: Phiên bản lặp lại sâu dần của A*, sử dụng giới hạn ngưỡng $f(n)$ thay vì giới hạn độ sâu để tiết kiệm bộ nhớ.
+  
+  ![IDA*](assets/GIF/IDA_star-ezgif.com-video-to-gif-converter.gif)
+  *Hoạt ảnh IDA**
 
 ### Nhận xét
 - `A*`: Cực kỳ hiệu quả và luôn đảm bảo tìm thấy giải pháp tối ưu. Số lượng nút duyệt được giảm thiểu đáng kể so với BFS/DFS.
@@ -82,11 +114,31 @@ Các thuật toán triển khai bao gồm:
 Tập trung vào việc cải tiến trạng thái hiện tại bằng cách đánh giá các nút lân cận mà không cần lưu trữ toàn bộ cây tìm kiếm, giảm độ phức tạp không gian về hằng số $O(1)$.
 Các thuật toán triển khai bao gồm:
 - **Simple Hill Climbing**: Di chuyển đến nút lân cận đầu tiên có giá trị heuristic tốt hơn trạng thái hiện tại.
+  
+  ![Simple HC](assets/GIF/Simple_HC-ezgif.com-video-to-gif-converter.gif)
+  *Hoạt ảnh Simple Hill Climbing*
+
 - **Steepest-Ascent Hill Climbing**: Đánh giá toàn bộ các trạng thái lân cận và chọn trạng thái có heuristic tốt nhất.
+  
+  ![Steepest HC](assets/GIF/Steepest-ezgif.com-video-to-gif-converter.gif)
+  *Hoạt ảnh Steepest-Ascent Hill Climbing*
+
 - **Stochastic Hill Climbing**: Chọn ngẫu nhiên một trong các trạng thái lân cận tốt hơn trạng thái hiện tại theo xác suất.
+  
+  ![Stochastic HC](assets/GIF/Sochastic-ezgif.com-video-to-gif-converter.gif)
+  *Hoạt ảnh Stochastic Hill Climbing*
+
 - **Simulated Annealing**: Sử dụng cơ chế giảm nhiệt độ $T$. Cho phép chấp nhận các bước đi tệ hơn với xác suất $P = e^{-\Delta E / T}$ để có cơ hội thoát khỏi cực trị địa phương.
+
 - **Random Restart Hill Climbing**: Khi bị kẹt tại cực trị địa phương, tự động khởi động lại thuật toán từ một trạng thái ngẫu nhiên hợp lệ mới cho đến khi tìm thấy lời giải.
+  
+  ![Random Restart HC](assets/GIF/Random-ezgif.com-video-to-gif-converter.gif)
+  *Hoạt ảnh Random Restart Hill Climbing*
+
 - **Local Beam Search**: Theo dõi đồng thời $k$ trạng thái tốt nhất. Tại mỗi bước, sinh ra tất cả các nút con của cả $k$ trạng thái này và chọn lại $k$ nút tốt nhất.
+  
+  ![Local Beam Search](assets/GIF/Local_Beam-ezgif.com-video-to-gif-converter.gif)
+  *Hoạt ảnh Local Beam Search*
 
 ### Nhận xét
 - Nhóm thuật toán Hill Climbing chạy cực nhanh và tốn ít bộ nhớ nhưng rất dễ bị mắc kẹt tại cực trị địa phương (local optimum), cao nguyên (plateau) hoặc sườn đồi (ridge) và dừng lại mà không tìm được đích.
@@ -99,8 +151,19 @@ Các thuật toán triển khai bao gồm:
 Giải quyết các bài toán khi môi trường không chắc chắn, không thể quan sát toàn bộ hoặc có cấu trúc phân nhánh đặc biệt.
 Các thuật toán triển khai bao gồm:
 - **AND-OR Graph Search**: Giải quyết bài toán trong môi trường không xác định bằng cách xây dựng một cây kế hoạch có các nhánh lựa chọn của Agent (OR) và các phản ứng của môi trường (AND).
+  
+  ![AND-OR Graph](assets/GIF/AND-OR-ezgif.com-video-to-gif-converter.gif)
+  *Hoạt ảnh AND-OR Graph Search*
+
 - **Belief State (Sensorless / Conformant Search)**: Tìm kiếm khi Agent bị "mù" hoàn toàn (không quan sát được). Thuật toán biểu diễn trạng thái dưới dạng một tập hợp gồm nhiều cấu hình khả thi (Belief State) và tìm chuỗi hành động đưa toàn bộ các cấu hình này về đích.
+  
+  ![Sensorless](assets/GIF/Belief_State-ezgif.com-video-to-gif-converter.gif)
+  *Hoạt ảnh Sensorless (Belief State) Search*
+
 - **Belief State & Goal (Partially Observable Search)**: Agent quan sát được một phần (ví dụ: chỉ biết vị trí của ô trống). Thuật toán cập nhật trạng thái niềm tin sau mỗi hành động và kết quả quan sát để thu hẹp dần các cấu hình khả thi cho đến khi đạt đích.
+  
+  ![Partially Observable](assets/GIF/Belief_StateGoal-ezgif.com-video-to-gif-converter.gif)
+  *Hoạt ảnh Partially Observable Search*
 
 ### Nhận xét
 - Nhóm thuật toán này giúp kiểm nghiệm các mô hình Agent hoạt động trong điều kiện thiếu thông tin.
@@ -113,9 +176,24 @@ Các thuật toán triển khai bao gồm:
 Biến đổi bài toán tìm kiếm thành việc tìm kiếm bộ giá trị cho các biến số sao cho thỏa mãn các ràng buộc định trước. Đối với 8-puzzle, các ô lưới là các biến, miền giá trị là $\{1..8, trống\}$, và các ràng buộc là tính kề cận của bước chuyển dịch.
 Các thuật toán triển khai bao gồm:
 - **AC-3 (Arc Consistency)**: Kiểm tra và thiết lập tính nhất quán cung tròn giữa các biến để loại bỏ sớm các giá trị không hợp lệ trong miền giá trị.
+  
+  ![AC-3](assets/GIF/AC-3-ezgif.com-video-to-gif-converter.gif)
+  *Hoạt ảnh AC-3 Arc Consistency*
+
 - **Backtracking Search**: Thuật toán quay lui gán giá trị từng bước cho các biến.
+  
+  ![Backtracking CSP](assets/GIF/Backtracking-ezgif.com-video-to-gif-converter.gif)
+  *Hoạt ảnh Backtracking Search*
+
 - **Forward Tracking**: Kết hợp quay lui với kiểm tra tiến trình (Forward Checking) để nhìn trước các biến chưa gán, loại bỏ các nhánh lỗi trước khi duyệt sâu.
+  
+  ![Forward Checking CSP](assets/GIF/Forward_Tracking-ezgif.com-video-to-gif-converter.gif)
+  *Hoạt ảnh Forward Tracking*
+
 - **Min-Conflicts**: Một thuật toán tìm kiếm cục bộ giải quyết CSP bằng cách chọn ngẫu nhiên một biến có xung đột và gán giá trị mới làm giảm thiểu số lượng ràng buộc bị vi phạm.
+  
+  ![Min-Conflicts CSP](assets/GIF/Min-conflicts-ezgif.com-video-to-gif-converter.gif)
+  *Hoạt ảnh Min-Conflicts*
 
 ### Nhận xét
 - Tiếp cận dưới góc độ CSP giúp tận dụng các cấu trúc ràng buộc để giải quyết bài toán một cách có hệ thống.
@@ -128,8 +206,19 @@ Các thuật toán triển khai bao gồm:
 Áp dụng cho môi trường có sự cạnh tranh trực tiếp giữa hai Agent (Người chơi X và AI O).
 Các thuật toán triển khai bao gồm:
 - **Minimax**: AI duyệt toàn bộ cây trò chơi để chọn nước đi tối đa hóa điểm số của mình (Max) và tối thiểu hóa điểm số của đối thủ (Min).
+  
+  ![Minimax Caro](assets/GIF/minimax-ezgif.com-video-to-gif-converter.gif)
+  *Hoạt ảnh Minimax*
+
 - **Alpha-Beta Pruning**: Cắt tỉa các nhánh của cây trò chơi chắc chắn không ảnh hưởng đến quyết định cuối cùng, giúp tăng tốc độ tìm kiếm đáng kể.
+  
+  ![Alpha-Beta Caro](assets/GIF/alpha-beta-ezgif.com-video-to-gif-converter.gif)
+  *Hoạt ảnh Alpha-Beta Pruning*
+
 - **Expectimax**: Sử dụng khi đối thủ không chơi tối ưu hoàn toàn mà di chuyển ngẫu nhiên hoặc có tính chất cơ hội. AI tính điểm trung bình (kỳ vọng) tại các nút của đối thủ.
+  
+  ![Expectimax Caro](assets/GIF/Expectimax-ezgif.com-video-to-gif-converter.gif)
+  *Hoạt ảnh Expectimax*
 
 ### Nhận xét
 - `Minimax` cho nước đi tối ưu tuyệt đối nhưng độ phức tạp tăng theo hàm mũ của độ sâu cây trò chơi.
