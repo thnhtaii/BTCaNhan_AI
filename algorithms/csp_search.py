@@ -250,8 +250,10 @@ def min_conflicts_search(start_state, goal_state, limit):
     if start_state == goal_state:
         return [], 1
         
+    total_nodes = 0
     for k in range(1, limit + 1):
         path, nodes = min_conflicts_for_k(start_state, goal_state, k)
+        total_nodes += nodes
         if path is not None:
-            return path, nodes
-    return None, 0
+            return path, total_nodes
+    return None, total_nodes

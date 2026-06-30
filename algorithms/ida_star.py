@@ -74,14 +74,14 @@ def ida_star(start_state, goal_state):
         return [], 0
 
     threshold = manhattan_distance(start_state, goal_state)
-    total_nodes = 1
+    total_nodes = 0
 
     while True:
         visited = set()
         result_threshold, result, nodes = _search(
             start_state, goal_state, [], 0, threshold, 1, visited
         )
-        total_nodes = max(total_nodes, nodes)
+        total_nodes += nodes
 
         if result is not None:
             return result, total_nodes
