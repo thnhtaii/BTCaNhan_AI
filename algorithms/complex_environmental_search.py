@@ -2,7 +2,7 @@ import time
 from collections import deque
 
 def get_one_alternate_state(state):
-    # Generates exactly 1 valid neighbor state to serve as the second starting belief state
+    # Tạo ra chính xác 1 trạng thái lân cận hợp lệ để làm trạng thái niềm tin bắt đầu thứ hai
     pos = state.index(0)
     r, c = pos // 3, pos % 3
     
@@ -17,7 +17,7 @@ def get_one_alternate_state(state):
     return swap(state, pos, pos + 3)
 
 def result_state(s, action):
-    # Transition function (forgiving: invalid moves return the same state)
+    # Hàm chuyển trạng thái (bỏ qua nếu nước đi không hợp lệ thì giữ nguyên trạng thái)
     pos = s.index(0)
     r, c = pos // 3, pos % 3
     new_s = list(s)
@@ -58,7 +58,7 @@ def format_po_states_ascii(actual, belief):
         res += f"  {idx+1}. {s_str[0:3]}|{s_str[3:6]}|{s_str[6:9]}\n"
     return res
 
-# 1. AND-OR Graph Search
+# AND-OR Graph Search
 def and_or_graph_search_solve(start_state, goal_state, limit=15):
     nodes_generated = 1
     
@@ -114,7 +114,7 @@ def and_or_graph_search_solve(start_state, goal_state, limit=15):
 
     plan = or_search(start_state, [])
     
-    # Construct path
+    # Dựng đường đi
     path = []
     if plan != "failure":
         current_plan = plan
@@ -130,10 +130,9 @@ def and_or_graph_search_solve(start_state, goal_state, limit=15):
     else:
         path = None
         
-    # Return log_data = None so UI formats it exactly like uninformed search
     return path, nodes_generated, None
 
-# 2. Sensorless Search (Conformant Search)
+# Sensorless Search (Conformant Search)
 def sensorless_search_solve(start_state, goal_state, start_state_2=None):
     if start_state_2 is None:
         alt_state = get_one_alternate_state(start_state)
@@ -151,7 +150,7 @@ def sensorless_search_solve(start_state, goal_state, start_state_2=None):
     while frontier and nodes_generated < max_nodes:
         curr_belief, path, curr_act1, curr_act2 = frontier.popleft()
         
-        # Check if belief state contains only the goal
+        # Kiểm tra nếu trạng thái niềm tin chỉ chứa trạng thái đích
         if len(curr_belief) == 1 and list(curr_belief)[0] == tuple(goal_state):
             found_path = path
             break
@@ -167,17 +166,15 @@ def sensorless_search_solve(start_state, goal_state, start_state_2=None):
                 nodes_generated += 1
                 frontier.append((next_belief, path + [(action, [next_act1, next_act2])], next_act1, next_act2))
                 
-    # Build logs
     log_data = []
     if found_path is not None:
-        # Start state dual
         log_data.append({
             "step": 0,
             "action_html": "Trạng thái niềm tin bắt đầu (2 cấu hình):",
             "frontier_str": format_two_states_ascii(start_state, alt_state),
             "reached_str": ""
         })
-        # Subsequent steps
+        # Các bước tiếp theo
         for idx, (action, act_states) in enumerate(found_path):
             log_data.append({
                 "step": idx + 1,
@@ -195,7 +192,7 @@ def sensorless_search_solve(start_state, goal_state, start_state_2=None):
         
     return found_path, nodes_generated, log_data
 
-# 3. Partially Observable Search
+# Partially Observable Search
 def partial_observable_search_solve(start_state, goal_state, start_state_2=None):
     if start_state_2 is None:
         alt_state = get_one_alternate_state(start_state)
@@ -203,7 +200,7 @@ def partial_observable_search_solve(start_state, goal_state, start_state_2=None)
         alt_state = start_state_2
     initial_belief = {tuple(start_state), tuple(alt_state)}
     
-    # frontier stores: (current_belief, path, current_actual)
+    # Hàng đợi frontier lưu: (trạng thái_niềm_tin_hiện_tại, đường_đi, trạng_thái_thực_tế_hiện_tại)
     frontier = deque([(initial_belief, [], start_state)])
     explored = {(tuple(sorted(initial_belief)), tuple(start_state))}
     nodes_generated = 1
@@ -222,9 +219,8 @@ def partial_observable_search_solve(start_state, goal_state, start_state_2=None)
             
         for action in ["Lên", "Xuống", "Trái", "Phải"]:
             next_actual = result_state(curr_actual, action)
-            # Predict
             pred_belief = {tuple(result_state(s, action)) for s in curr_belief}
-            # Update (Filter by blank position)
+            # Cập nhật (Lọc theo vị trí ô trống)
             percept = next_actual.index(0)
             next_belief = {s for s in pred_belief if s.index(0) == percept}
             
@@ -232,11 +228,10 @@ def partial_observable_search_solve(start_state, goal_state, start_state_2=None)
             if state_key not in explored:
                 explored.add(state_key)
                 nodes_generated += 1
-                # Path stores actual_state and the first candidate in the belief state (or just the belief state subset)
+                # Đường đi lưu trạng thái thực tế và ứng cử viên đầu tiên trong trạng thái niềm tin (hoặc chỉ tập con trạng thái niềm tin)
                 first_belief = list(next_belief)[0] if next_belief else next_actual
                 frontier.append((next_belief, path + [(action, [next_actual, list(first_belief)])], next_actual))
                 
-    # Build logs
     log_data = []
     if found_path is not None:
         temp_belief = initial_belief

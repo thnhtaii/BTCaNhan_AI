@@ -46,7 +46,7 @@ def count_manhattan(mt, goal):
 def simulated_annealing_solve(start_state, goal_state, initial_temp=1000, cooling_rate=0.95, min_temp=1e-3, max_steps=10000):
     """
     Thuật toán Simulated Annealing (Luyện kim) cho 8-puzzle.
-    Heuristic: Số ô sai vị trí. Nhiệt độ giảm dần (T = T * cooling_rate).
+    Hàm đánh giá (Heuristic): Số ô sai vị trí. Nhiệt độ giảm dần (T = T * cooling_rate).
     """
     log_data = []
     def h(state): return count_misplaced(state, goal_state)
@@ -61,7 +61,7 @@ def simulated_annealing_solve(start_state, goal_state, initial_temp=1000, coolin
     while T > min_temp and iteration < max_steps:
         iteration += 1
         if current_state == goal_state:
-            log_data.append({"step": iteration, "action_html": f"Đạt được trạng thái Goal!<br>👉 THUẬT TOÁN DỪNG VÀ TRẢ VỀ THÀNH CÔNG 🎉", "frontier_str": "Đã đạt đích!", "reached_str": f"Thành công sau {iteration - 1} bước lặp!"})
+            log_data.append({"step": iteration, "action_html": f"Đạt được trạng thái Goal!<br>THUẬT TOÁN DỪNG VÀ TRẢ VỀ THÀNH CÔNG", "frontier_str": "Đã đạt đích!", "reached_str": f"Thành công sau {iteration - 1} bước lặp!"})
             return path, nodes_generated, log_data
         successors = get_successors(current_state)
         if not successors:
@@ -100,6 +100,6 @@ def simulated_annealing_solve(start_state, goal_state, initial_temp=1000, coolin
         log_data.append({"step": iteration, "action_html": action_html, "frontier_str": f"h = {current_h}", "reached_str": f"T = {T:.4f}"})
         T *= cooling_rate
     fail_html = f"<b style='color: #c53030;'>Nhiệt độ đã giảm về 0 hoặc vượt quá {max_steps} bước lặp mà chưa tìm ra lời giải!</b><br>"
-    fail_html += f"👉 <b>THUẬT TOÁN DỪNG</b> ❌"
+    fail_html += f"<b>THUẬT TOÁN DỪNG</b>"
     log_data.append({"step": "KQ", "action_html": fail_html, "frontier_str": "Hết bước lặp / T ≈ 0!", "reached_str": f"Nodes: {nodes_generated}"})
     return path, nodes_generated, log_data

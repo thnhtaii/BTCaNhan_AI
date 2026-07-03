@@ -32,7 +32,7 @@ def get_successors(mt):
     return successors
 
 def manhattan_distance(state, goal):
-    """h(n): Manhattan distance heuristic."""
+    """h(n): Hàm đánh giá khoảng cách Manhattan."""
     distance = 0
     for i in range(9):
         if state[i] != 0:
@@ -41,7 +41,7 @@ def manhattan_distance(state, goal):
     return distance
 
 def _search(node, goal_state, path, g, threshold, nodes_count, visited):
-    """Recursive search helper for IDA*."""
+    """Hàm đệ quy hỗ trợ cho tìm kiếm IDA*."""
     f = g + manhattan_distance(node, goal_state)
 
     if f > threshold:
@@ -69,7 +69,7 @@ def _search(node, goal_state, path, g, threshold, nodes_count, visited):
     return min_threshold, None, nodes_count
 
 def ida_star(start_state, goal_state):
-    """IDA* Search using Manhattan distance heuristic."""
+    """Tìm kiếm IDA* sử dụng hàm đánh giá khoảng cách Manhattan."""
     if start_state == goal_state:
         return [], 0
 

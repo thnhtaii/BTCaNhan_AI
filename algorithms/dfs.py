@@ -31,7 +31,7 @@ def get_successors(mt):
     return successors
 
 def dfs(start_state, goal_state, mode="early", max_depth=50):
-    """Depth-First Search with early/late goal test and depth limit."""
+    """Thuật toán Tìm kiếm theo Chiều sâu (Depth-First Search) với kiểm tra đích sớm/muộn và giới hạn độ sâu."""
     if start_state == goal_state:
         return [], 0
         
@@ -63,7 +63,7 @@ def dfs(start_state, goal_state, mode="early", max_depth=50):
                     if tuple(child) not in explored or explored[tuple(child)] > depth + 1:
                         explored[tuple(child)] = depth + 1
                         frontier.append((child, path + [(action, child)], depth + 1))
-                else:  # mode == "late"
+                else:  # chế độ == "muộn"
                     if tuple(child) not in explored or explored[tuple(child)] > depth + 1:
                         frontier.append((child, path + [(action, child)], depth + 1))
                         nodes_generated += 1

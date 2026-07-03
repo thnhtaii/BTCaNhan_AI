@@ -1,24 +1,24 @@
 import time
 import random
 
-# Player definitions:
-# 0 = empty
-# 1 = Player X (Human)
-# 2 = Player O (AI)
+# Định nghĩa người chơi:
+# 0 = trống
+# 1 = Người chơi X (Người)
+# 2 = Người chơi O (AI)
 
 def check_winner(board):
-    # Winning combinations (3x3 grid indices)
+    # Các tổ hợp chiến thắng (chỉ số trên lưới 3x3)
     win_combos = [
-        [0, 1, 2], [3, 4, 5], [6, 7, 8], # rows
-        [0, 3, 6], [1, 4, 7], [2, 5, 8], # columns
-        [0, 4, 8], [2, 4, 6]             # diagonals
+        [0, 1, 2], [3, 4, 5], [6, 7, 8], # hàng
+        [0, 3, 6], [1, 4, 7], [2, 5, 8], # cột
+        [0, 4, 8], [2, 4, 6]             # đường chéo
     ]
     for combo in win_combos:
         if board[combo[0]] == board[combo[1]] == board[combo[2]] != 0:
-            return board[combo[0]] # Returns 1 or 2
+            return board[combo[0]] # Trả về 1 hoặc 2
     if 0 not in board:
-        return 0 # Draw
-    return None # Game not finished
+        return 0 # Hòa
+    return None # Trò chơi chưa kết thúc
 
 def get_legal_moves(board):
     return [i for i in range(9) if board[i] == 0]
@@ -28,7 +28,7 @@ def make_move(board, idx, player):
     new_board[idx] = player
     return new_board
 
-# --- MINIMAX ---
+# MINIMAX
 def minimax_search(board):
     nodes_generated = 0
     
@@ -60,7 +60,7 @@ def minimax_search(board):
             v = min(v, max_value(make_move(state, move, 1), depth + 1))
         return v
 
-    # Root call (AI O's turn)
+    # Lượt của AI O
     legal = get_legal_moves(board)
     if not legal:
         return None, 0
@@ -77,7 +77,7 @@ def minimax_search(board):
     return best_move, nodes_generated
 
 
-# --- ALPHA-BETA ---
+# ALPHA-BETA
 def alpha_beta_search(board):
     nodes_generated = 0
     
@@ -134,7 +134,7 @@ def alpha_beta_search(board):
     return best_move, nodes_generated
 
 
-# --- EXPECTIMAX ---
+# EXPECTIMAX
 def expectimax_search(board):
     nodes_generated = 0
     
@@ -185,11 +185,11 @@ def expectimax_search(board):
             
     return best_move, nodes_generated
 
-# Solve dispatcher for the API
+# Hàm điều phối giải thuật cho API
 def adversarial_solve(board, algorithm='minimax'):
     t0 = time.time()
     
-    # 1. Identify current winner
+    # Xác định người chiến thắng hiện tại
     initial_winner = check_winner(board)
     if initial_winner is not None:
         elapsed = int((time.time() - t0) * 1000)
@@ -203,7 +203,7 @@ def adversarial_solve(board, algorithm='minimax'):
             "time": elapsed
         }
         
-    # 2. Select algorithm
+    # Chọn thuật toán
     if algorithm == 'minimax':
         best_move, nodes = minimax_search(board)
     elif algorithm == 'alpha_beta':
@@ -216,7 +216,7 @@ def adversarial_solve(board, algorithm='minimax'):
     elapsed = int((time.time() - t0) * 1000)
     
     if best_move is not None:
-        new_board = make_move(board, best_move, 2) # AI places O
+        new_board = make_move(board, best_move, 2) # AI đi nước O
         winner = check_winner(new_board)
         return {
             "success": True,

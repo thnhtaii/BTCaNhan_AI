@@ -31,7 +31,6 @@ def get_successors(mt):
     return successors
 
 def dfs_limit(start_state, goal_state, limit, mode="early"):
-    """Depth-limited search helper for IDS."""
     if start_state == goal_state:
         return [], 0
         
@@ -63,15 +62,14 @@ def dfs_limit(start_state, goal_state, limit, mode="early"):
                     if tuple(child) not in explored or explored[tuple(child)] > depth + 1:
                         explored[tuple(child)] = depth + 1
                         frontier.append((child, path + [(action, child)], depth + 1))
-                else:  # mode == "late"
+                else:  
                     if tuple(child) not in explored or explored[tuple(child)] > depth + 1:
                         frontier.append((child, path + [(action, child)], depth + 1))
                         nodes_generated += 1
                         
     return None, nodes_generated
-
+ 
 def ids(start_state, goal_state, mode="early", max_depth=50):
-    """Iterative Deepening Search - repeatedly runs DFS with increasing depth limits."""
     if start_state == goal_state:
         return [], 0
     

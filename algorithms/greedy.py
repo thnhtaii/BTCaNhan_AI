@@ -32,7 +32,7 @@ def get_successors(mt):
     return successors
 
 def manhattan_distance(state, goal):
-    """h(n): Manhattan distance heuristic."""
+    """h(n): Hàm đánh giá khoảng cách Manhattan."""
     distance = 0
     for i in range(9):
         if state[i] != 0:
@@ -41,8 +41,8 @@ def manhattan_distance(state, goal):
     return distance
 
 def greedy(start_state, goal_state, mode="late"):
-    """Greedy Best-First Search using Manhattan distance.
-       Only considers h(n), ignores path cost g(n).
+    """Thuật toán Tìm kiếm Tham lam (Greedy Best-First Search) sử dụng khoảng cách Manhattan.
+       Chỉ xem xét h(n), bỏ qua chi phí đường đi g(n).
     """
     if start_state == goal_state:
         return [], 0

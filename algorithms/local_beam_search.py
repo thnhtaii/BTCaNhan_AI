@@ -39,8 +39,7 @@ def state_to_tuple(state):
 
 def local_beam_search_solve(start_state, goal_state, k=3, max_steps=500):
     """
-    Thuật toán Local Beam Search cho 8-puzzle.
-    Heuristic: Manhattan distance. Giữ k trạng thái tốt nhất mỗi bước.
+    Heuristic: Manhattan
     """
     log_data = []
     def h(state): return count_manhattan(state, goal_state)
@@ -53,12 +52,12 @@ def local_beam_search_solve(start_state, goal_state, k=3, max_steps=500):
     for iteration in range(1, max_steps + 1):
         for state, state_h, path in beam:
             if state == goal_state:
-                log_data.append({"step": iteration, "action_html": f"Trạng thái trong beam trùng khớp với Goal!<br>👉 THUẬT TOÁN DỪNG VÀ TRẢ VỀ THÀNH CÔNG 🎉", "frontier_str": "Đã đạt đích!", "reached_str": f"Thành công sau {iteration - 1} bước lặp!"})
+                log_data.append({"step": iteration, "action_html": f"Trạng thái trong beam trùng khớp với Goal!<br>THUẬT TOÁN DỪNG VÀ TRẢ VỀ THÀNH CÔNG", "frontier_str": "Đã đạt đích!", "reached_str": f"Thành công sau {iteration - 1} bước lặp!"})
                 return path, nodes_generated, log_data
         all_candidates = []
         action_html = f"<b>Bước lặp {iteration}</b> - Beam hiện tại có {len(beam)} trạng thái:<br>"
         for beam_idx, (current_state, current_h, current_path) in enumerate(beam):
-            action_html += f"<br>📌 Beam[{beam_idx + 1}]: h = {current_h}<br>"
+            action_html += f"<br>Beam[{beam_idx + 1}]: h = {current_h}<br>"
             successors = get_successors(current_state)
             for action, child, _ in successors:
                 child_tuple = state_to_tuple(child)
@@ -72,7 +71,7 @@ def local_beam_search_solve(start_state, goal_state, k=3, max_steps=500):
                     action_html += f"  - {action}: <span style='color:#7f7f7f;'>Đã thăm</span><br>"
         if not all_candidates:
             action_html += f"<br><b style='color: #d62728;'>Không có trạng thái lân cận mới nào!</b><br>"
-            action_html += f"👉 <b>THUẬT TOÁN DỪNG - KHÔNG TÌM ĐƯỢC LỜI GIẢI</b> ❌"
+            action_html += f"<b>THUẬT TOÁN DỪNG - KHÔNG TÌM ĐƯỢC LỜI GIẢI</b>"
             log_data.append({"step": iteration, "action_html": action_html, "frontier_str": "Hết trạng thái mới!", "reached_str": "Thất bại!"})
             best_in_beam = min(beam, key=lambda x: x[1])
             return best_in_beam[2], nodes_generated, log_data
@@ -89,15 +88,15 @@ def local_beam_search_solve(start_state, goal_state, k=3, max_steps=500):
         best_current_h = min(s[1] for s in beam)
         best_new_h = selected[0][1] if selected else float('inf')
         action_html += f"<br>Tổng cộng {len(all_candidates)} trạng thái lân cận mới.<br>"
-        action_html += f"👉 <b>Chọn {len(selected)} trạng thái tốt nhất</b> cho beam mới:<br>"
+        action_html += f"<b>Chọn {len(selected)} trạng thái tốt nhất</b> cho beam mới:<br>"
         for i, (s, sh, sp, si, sa) in enumerate(selected):
-            action_html += f"  ✅ Beam[{i+1}]: h = {sh} (từ Beam[{si+1}] → {sa})<br>"
+            action_html += f"  Beam[{i+1}]: h = {sh} (từ Beam[{si+1}] → {sa})<br>"
         log_data.append({"step": iteration, "action_html": action_html, "frontier_str": f"Best h: {best_current_h} → {best_new_h}", "reached_str": f"Beam size: {len(selected)}, Nodes: {nodes_generated}"})
         beam = [(s, sh, sp) for s, sh, sp, si, sa in selected]
         for s, sh, sp in beam:
             visited.add(state_to_tuple(s))
     fail_html = f"<b style='color: #c53030;'>Đã hết {max_steps} bước lặp mà chưa tìm ra lời giải!</b><br>"
-    fail_html += f"👉 <b>THUẬT TOÁN DỪNG</b> ❌"
+    fail_html += f"<b>THUẬT TOÁN DỪNG</b>"
     log_data.append({"step": "KQ", "action_html": fail_html, "frontier_str": "Hết bước lặp!", "reached_str": f"Nodes: {nodes_generated}"})
     best_in_beam = min(beam, key=lambda x: x[1])
     return best_in_beam[2], nodes_generated, log_data

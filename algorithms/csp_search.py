@@ -70,7 +70,7 @@ def ac3_search(start_state, goal_state, limit):
     goal = goal_state
     
     current = [0] * 9
-    for i in range(8): # reveal first 8 cells (1 to 8)
+    for i in range(8): 
         current = list(current)
         current[i] = goal[i]
         action = f"Gán ô {i+1} = {goal[i]}"
@@ -121,7 +121,7 @@ def forward_tracking_search(start_state, goal_state, limit):
                 if child == goal_state:
                     return path + [(action, child)]
                 
-                # Look ahead (Forward check)
+                # Forward check
                 child_successors = get_successors(child)
                 has_valid_successor = False
                 for _, next_child in child_successors:
@@ -179,8 +179,7 @@ def min_conflicts_for_k(start_state, goal_state, k, max_steps=1000):
                 conflicted_vars.append(i)
                 
         if not conflicted_vars:
-            # No conflicted variable but not all ok? (e.g. constraints at boundary)
-            # Pick a random variable to change
+            # Chọn một biến ngẫu nhiên để thay đổi
             var_idx = random.randint(1, k - 1)
         else:
             var_idx = random.choice(conflicted_vars)

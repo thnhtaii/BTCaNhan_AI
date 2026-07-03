@@ -60,7 +60,6 @@ def count_manhattan(mt, goal):
 
 def hill_climbing_solve(start_state, goal_state, heuristic_name="misplaced"):
     """
-    Thuật toán Simple Hill Climbing (Leo đồi đơn giản) cho 8-puzzle.
     Chọn nút con đầu tiên tốt hơn nút hiện tại theo thứ tự: Trái -> Phải -> Lên -> Xuống.
     """
     log_data = []
@@ -76,7 +75,7 @@ def hill_climbing_solve(start_state, goal_state, heuristic_name="misplaced"):
     current_state = list(start_state)
     current_h = h(current_state)
     
-    path = []  # Lưu các bước di chuyển [(action, state), ...]
+    path = []
     
     nodes_generated = 1
     step_count = 0
@@ -91,7 +90,7 @@ def hill_climbing_solve(start_state, goal_state, heuristic_name="misplaced"):
     
     while True:
         if current_state == goal_state:
-            action_html = f"Trạng thái hiện tại trùng khớp hoàn toàn với Goal.<br>👉 THUẬT TOÁN DỪNG VÀ TRẢ VỀ THÀNH CÔNG 🎉"
+            action_html = f"Trạng thái hiện tại trùng khớp hoàn toàn với Goal.<br>THUẬT TOÁN DỪNG VÀ TRẢ VỀ THÀNH CÔNG"
             log_data.append({
                 "step": step_count + 1,
                 "action_html": action_html,
@@ -128,7 +127,7 @@ def hill_climbing_solve(start_state, goal_state, heuristic_name="misplaced"):
                 status_str = "<span style='color: #7f7f7f;'>KHÔNG XÉT</span> (Đã chọn được nút tốt hơn trước đó)"
                 children_logs.append((action, "-", status_str))
             
-        # Xây dựng action_html cho bước này
+        # Xây dựng action_html
         step_count += 1
         curr_name = "S" if step_count == 1 else f"N_{step_count-1}"
         next_name = f"N_{step_count}"
@@ -141,7 +140,7 @@ def hill_climbing_solve(start_state, goal_state, heuristic_name="misplaced"):
         if found_better:
             path.append((next_action, next_state))
             
-            action_html += f"<br>👉 Di chuyển sang {next_action} ({next_name}) có h = {next_h}."
+            action_html += f"<br>Di chuyển sang {next_action} ({next_name}) có h = {next_h}."
             
             # Cập nhật trạng thái hiện tại
             current_state = next_state
@@ -156,7 +155,7 @@ def hill_climbing_solve(start_state, goal_state, heuristic_name="misplaced"):
             })
         else:
             action_html += f"<br><b style='color: #d62728;'>CẢNH BÁO:</b> Không tìm thấy nút con nào có h tốt hơn h_hiện_tại = {current_h}!<br>"
-            action_html += f"👉 <b>THUẬT TOÁN DỪNG VÀ BỊ KẸT TẠI CỰC TRỊ ĐỊA PHƯƠNG (LOCAL OPTIMUM)</b> ❌"
+            action_html += f"<b>THUẬT TOÁN DỪNG VÀ BỊ KẸT TẠI CỰC TRỊ ĐỊA PHƯƠNG (LOCAL OPTIMUM)</b>"
             log_data.append({
                 "step": step_count,
                 "action_html": action_html,
